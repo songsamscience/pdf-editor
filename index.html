@@ -954,6 +954,19 @@ button.pv-thumb:hover{border-color:var(--blue-300);box-shadow:var(--ring)}
 .pv-grid .pv-obtns .btn{flex:1;padding:6px 4px}
 .pv-grid .pv-see span{display:none}
 
+/* 결과가 여럿일 때 목록 위 「zip으로 모두 저장」 띠 */
+.pv-bulk{display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:12px 12px 12px 14px;border:1px solid var(--blue-200);border-radius:var(--r-md);background:var(--blue-50)}
+.pv-bulk-ic{flex:none;width:40px;height:40px;border-radius:12px;background:#fff;border:1px solid var(--blue-200);display:grid;place-items:center;color:var(--accent)}
+.pv-bulk-ic svg{width:20px;height:20px}
+.pv-bulk-tt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.pv-bulk-tt b{font-size:14.5px;font-weight:700;color:var(--ink)}
+.pv-bulk-tt span{font-size:12.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pv-bulk-btn{flex:none;white-space:nowrap}
+@media (max-width:640px){
+  .pv-bulk{flex-wrap:wrap}
+  .pv-bulk-btn{flex-basis:100%;justify-content:center}
+}
+
 /* 결과 단추 줄: 「설정 고쳐 다시 하기」가 들어와 넷 */
 .result-acts.pv-racts{grid-template-columns:1fr auto auto auto}
 @media (max-width:900px){
@@ -1371,7 +1384,7 @@ button.pv-thumb:hover{border-color:var(--blue-300);box-shadow:var(--ring)}
    송쌤과학 PDF 편집기 — 공통 뼈대
    모든 처리는 브라우저 안에서만 끝난다. 서버로 파일을 보내지 않는다.
    ===================================================================== */
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.3.1';
 // CDN 라이브러리가 하나라도 안 왔으면 빈 화면 대신 안내를 띄운다
 if (!window.PDFLib || !window.pdfjsLib || !window.JSZip || !window.fontkit) {
   const missing = ['PDFLib', 'pdfjsLib', 'JSZip', 'fontkit'].filter(k => !window[k]).join(', ');
@@ -1528,13 +1541,22 @@ function downloadBlob(bytes, name, mime = 'application/octet-stream') {
   const a = h('a', { href: url, download: name }); document.body.append(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
-async function makeZip(outputs, name) {
+/** 이미 압축된 형식(그림·PDF·zip·docx)은 다시 줄지 않으니 그대로 담는다(STORE) — 그림 수십 장도 금방 묶인다 */
+const ZIP_STORE = /^image\/(jpeg|png|webp|gif)$|^application\/(pdf|zip)$|officedocument/;
+/** 결과 여럿 → zip 하나. 이름이 겹치면 「이름(1).jpg」. onPct(0~1): 묶는 진행 */
+async function makeZip(outputs, name, onPct) {
   const zip = new JSZip();
-  const used = new Set();
-  outputs.forEach(o => { let n = o.name, k = 1; while (used.has(n)) n = baseName(o.name) + `(${k++})` + o.name.slice(baseName(o.name).length); used.add(n); zip.file(n, o.bytes); });
-  const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE', compressionOptions: { level: 3 } });
+  const used = new Set(), date = new Date(Date.now() - new Date().getTimezoneOffset() * 60000); // JSZip 은 시각을 UTC 로 적으므로 지금 시각(현지)으로 보이게
+  outputs.forEach(o => {
+    let n = o.name, k = 1; while (used.has(n.toLowerCase())) n = baseName(o.name) + `(${k++})` + o.name.slice(baseName(o.name).length);
+    used.add(n.toLowerCase()); // 윈도우·맥은 대소문자만 다른 이름을 같은 파일로 본다
+    zip.file(n, o.bytes, { date, ...(ZIP_STORE.test(o.mime || '') ? { compression: 'STORE' } : {}) });
+  });
+  const bytes = await zip.generateAsync({ type: 'uint8array', compression: 'DEFLATE', compressionOptions: { level: 3 } }, m => onPct && onPct(m.percent / 100));
   return { name, bytes, mime: 'application/zip' };
 }
+/** zip 파일 이름: 「PDF → 그림」 같은 도구 이름의 화살표는 _ 로, 파일 이름에 못 쓰는 글자는 뺀다 */
+const zipNameOf = (stem, fallback = '결과') => `${(String(stem || '').replace(/\s*→\s*/g, '_').replace(/[\\/:*?"<>|\u0000-\u001f]/g, '').replace(/\s+/g, ' ').replace(/^[\s._]+|[\s._]+$/g, '') || fallback)}.zip`;
 const canvasToBlob = (canvas, type = 'image/png', q = 0.92) => new Promise(res => canvas.toBlob(res, type, q));
 const blobToBytes = async blob => new Uint8Array(await blob.arrayBuffer());
 const bytesToDataUrl = (bytes, mime) => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(new Blob([bytes], { type: mime })); });
@@ -5592,7 +5614,8 @@ PE.registerTool({
       PE.ui.adv('화질 · 쪽 범위',
         s.mode === 'pages' ? PE.ui.opt('화질(해상도)', PE.ui.seg([{ v: 1, label: '보통', sub: '72 dpi' }, { v: 2, label: '선명', sub: '144 dpi' }, { v: 3, label: '매우 선명', sub: '216 dpi' }, { v: 4.17, label: '인쇄용', sub: '300 dpi' }], s.scale, v => { s.scale = +v; up(); }, { vert: false })) : null,
         PE.ui.opt({ text: '쪽 범위', hint: '비우면 전체' }, PE.ui.text(s.range, '예: 1-3,7', v => { s.range = v; up(); }))),
-      PE.ui.note(s.mode === 'pages' ? '미리 보기는 고른 쪽을 지금 설정으로 실제로 만든 그림입니다. 「실제 크기」로 선명도를 확인하세요. 그림이 여러 장이면 결과 화면에서 zip으로 한 번에 저장할 수 있습니다.' : '같은 그림이 여러 쪽에 쓰였으면 한 번만 꺼냅니다. 아주 작은 그림(아이콘 등)은 건너뜁니다.'));
+      PE.ui.note((s.mode === 'pages' ? '미리 보기는 고른 쪽을 지금 설정으로 실제로 만든 그림입니다. 「실제 크기」로 선명도를 확인하세요. ' : '같은 그림이 여러 쪽에 쓰였으면 한 번만 꺼냅니다. 아주 작은 그림(아이콘 등)은 건너뜁니다. ')
+        + '결과가 여러 장이면 zip 파일 하나로 한 번에, 한 장이면 그림 파일 그대로 저장합니다.'));
   },
   async run(ctx) {
     const s = ctx.state, outs = [], mime = s.fmt === 'png' ? 'image/png' : 'image/jpeg', ext = s.fmt === 'png' ? '.png' : '.jpg';
@@ -5613,6 +5636,8 @@ PE.registerTool({
         if (!n) PE.toast(`${f.name}: 꺼낼 그림이 없습니다`);
       }
     }
+    // 「모두 저장」 zip 이름: 원본 이름_그림.zip (여러 파일이면 날짜)
+    ctx.zipName = zipNameOf(`${ctx.files.length === 1 ? baseName(ctx.files[0].name) : `PDF_${dateStamp()}`}_${s.mode === 'pages' ? '그림' : '추출그림'}`);
     return outs;
   },
 });
@@ -8463,7 +8488,7 @@ const App = {
   async run() {
     const ctx = this.ctx, tool = ctx.tool;
     if (!ctx || ctx.runBtn.disabled) return;
-    ctx.runBtn.disabled = true; ctx.showError('');
+    ctx.runBtn.disabled = true; ctx.showError(''); ctx.zipName = null; // zipName: 도구가 정하는 「모두 저장」 zip 이름(선택)
     await PE.progress.start(tool.name + ' 처리 중' + (tool.heavy ? ' (큰 파일은 수십 초)' : ''), { indet: true });
     const t0 = performance.now();
     try {
@@ -8482,7 +8507,7 @@ const App = {
       const runId = uid();
       PE.state.lastRun = { id: runId, toolId: tool.id, ctx, files: PE.state.files.slice(), chain: PE.state.chain.slice() };
       try { history.replaceState({ ...(history.state || {}), peRun: runId }, ''); } catch (e) { }
-      PE.state.resultMeta = { tool: tool.id, toolName: tool.name, inputSize, ms: performance.now() - t0, note: ctx.resultNote || null };
+      PE.state.resultMeta = { tool: tool.id, toolName: tool.name, inputSize, ms: performance.now() - t0, note: ctx.resultNote || null, zipName: ctx.zipName || null };
       PE.state.chain.push(tool.name);
       this.remember(tool.id);
       if (PE.prefs) PE.prefs.save(tool, ctx.state); // 다음에 이 도구를 열면 같은 설정으로
@@ -8506,7 +8531,15 @@ const App = {
     const pct = meta.inputSize ? Math.round((1 - total / meta.inputSize) * 100) : null;
     const V = PE.viewer, kindOf = o => V.kind(o), printable = o => !!o && ['pdf', 'image'].includes(kindOf(o));
     const saveOne = o => { o.saved = true; downloadBlob(o.bytes, o.name, o.mime); paintSaved(); };
-    const dlAll = this._dlAll = async () => { if (outs.length === 1) return saveOne(outs[0]); await PE.progress.start('zip으로 묶는 중', { indet: true }); const z = await makeZip(outs, `${meta.toolName || '결과'}_${dateStamp()}.zip`); PE.progress.end(); outs.forEach(o => o.saved = true); downloadBlob(z.bytes, z.name, z.mime); paintSaved(); };
+    // 「모두 저장」: 결과가 하나면 그 파일 그대로(그림 한 장 → 그림 파일), 여럿이면 zip 하나로 묶는다
+    const zipName = meta.zipName || zipNameOf(`${meta.toolName || '결과'}_${dateStamp()}`);
+    const dlAll = this._dlAll = async () => {
+      if (outs.length === 1) return saveOne(outs[0]);
+      await PE.progress.start(`${outs.length}개를 zip 파일 하나로 묶는 중`, { indet: true });
+      try { const z = await makeZip(outs, zipName, f => PE.progress.set(f)); outs.forEach(o => o.saved = true); downloadBlob(z.bytes, z.name, z.mime); paintSaved(); }
+      catch (e) { console.error(e); PE.toast('zip으로 묶지 못했습니다: ' + (e && e.message ? e.message : e), 5000); }
+      finally { PE.progress.end(); }
+    };
     // 원본 → 결과 크기는 결과가 모두 PDF 일 때만(그림·보고서는 견줄 대상이 아니다)
     // 결과가 여럿이면 이 파일 하나가 아니라 합계라는 것을 밝힌다
     const sizeLine = meta.inputSize && outs.every(o => o.mime === 'application/pdf') ? `${outs.length > 1 ? `결과 ${outs.length}개 합계: ` : ''}원본 ${fmtSize(meta.inputSize)} → 결과 ${fmtSize(total)}${pct ? ` (${pct > 0 ? pct + '% 작아짐' : -pct + '% 커짐'})` : ''}` : '';
@@ -8534,6 +8567,13 @@ const App = {
       return h('label.oname.pv-oname', box, ext ? h('span.oext', ext) : null, h('span.pv-pen', { html: icon('pencil') }));
     };
     const imgGrid = outs.length > 1 && outs.every(o => kindOf(o) === 'image');
+    const extOf = o => ((/\.([^.\s]{1,5})$/.exec(o.name) || [])[1] || '').toUpperCase();
+    const saveLabel = outs.length > 1 ? '모두 저장 (zip)' : kindOf(outs[0]) === 'image' ? `그림 저장${extOf(outs[0]) ? ` (${extOf(outs[0])})` : ''}` : '저장';
+    // 결과가 여럿이면 목록 위에 「zip으로 모두 저장」 — 그림 수십 장이면 아래 단추는 스크롤해야 보이므로
+    const bulk = outs.length > 1 ? h('div.pv-bulk',
+      h('span.pv-bulk-ic', { 'aria-hidden': 'true', html: icon('zip') }),
+      h('div.pv-bulk-tt', h('b', `${imgGrid ? `그림 ${outs.length}장을` : `파일 ${outs.length}개를`} zip 파일 하나로`), h('span', `${zipName} · 약 ${fmtSize(total)}`)),
+      h('button.btn.btn-primary.pv-bulk-btn', { type: 'button', onclick: dlAll, title: 'zip 파일 하나로 저장 (Ctrl+S)' }, iconEl('down'), h('span', 'zip으로 모두 저장'))) : null;
     const row = (o, i) => {
       const k = kindOf(o), pages = h('span.opages', k === 'image' ? '그림' : k === 'text' ? '글' : o.mime === 'application/zip' ? 'zip' : '');
       const th = V.thumbEl(o, imgGrid ? 200 : 96, inf => { pages.textContent = inf.locked ? '암호 걸림' : inf.pages ? `${inf.pages}쪽` : ''; });
@@ -8560,10 +8600,11 @@ const App = {
         PE.state.chain.length > 1 ? h('div.chain', PE.state.chain.flatMap((n, i) => [i ? iconEl('next') : null, h('b', n)])) : null),
       h('div.result-body',
         meta.note ? h('div.note', { html: meta.note }) : null,
+        bulk,
         h('p.pv-hint', anySrc ? '「원본과 비교」로 바뀐 곳을 원본과 겹쳐 봅니다 · 썸네일을 누르면 크게 봅니다 · 이름은 눌러서 바로 고칠 수 있어요' : '썸네일을 누르면 크게 봅니다 · 이름은 눌러서 바로 고칠 수 있어요'),
         h('div.outs', { class: (imgGrid ? 'pv-grid' : 'pv-list') + (outs.length > (imgGrid ? 12 : 6) ? ' many' : '') }, rows),
         h('div.result-acts.pv-racts',
-          h('button.btn.btn-primary.btn-lg.btn-cta', { type: 'button', onclick: dlAll, title: 'Ctrl+S' }, h('span.label', outs.length > 1 ? `모두 저장 (zip)` : '저장'), iconEl('down')),
+          h('button.btn.btn-primary.btn-lg.btn-cta', { type: 'button', onclick: dlAll, title: 'Ctrl+S' }, h('span.label', saveLabel), iconEl('down')),
           canRerun ? h('button.btn.btn-lg.pv-rerun', { type: 'button', title: '같은 파일·같은 설정으로 도구 화면에 돌아갑니다', onclick: () => this.rerun() }, iconEl('back'), '설정 고쳐 다시 하기') : null,
           sameTool ? h('button.btn.btn-lg', { type: 'button', onclick: () => { this._dropLast(); V.release(PE.state.results); PE.files.clear(); PE.state.results = []; PE.state.chain = []; this.ctx = null; this.go('#/tool/' + sameTool.id); } }, iconEl('refresh'), '같은 도구로 다른 파일') : null,
           h('button.btn.btn-lg.btn-ghost', { type: 'button', onclick: () => { this._dropLast(); V.release(PE.state.results); PE.files.clear(); PE.state.results = []; PE.state.chain = []; this.go('#/'); } }, iconEl('home'), '처음으로')),
