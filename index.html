@@ -811,6 +811,41 @@ del.d{background:#FBD6DB;color:#9C1C2C}
 
 </style>
 <style>
+/* ---- 11_ocr.css ---- */
+/* =====================================================================
+   OCR 「한 쪽 시험 인식」(41_tools_optimize.js ocrTrial) — 접두어 ocr-
+   ===================================================================== */
+.ocr-tabs{margin-left:auto;flex:none}
+.ocr-tabs button{padding:6px 12px;white-space:nowrap}
+.ocr-try{display:flex;flex-direction:column;gap:10px}
+.ocr-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ocr-bar .ocr-file{max-width:240px}
+.ocr-pg{width:64px;text-align:center}
+.ocr-total{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ocr-go{margin-left:auto}
+.ocr-status{font-size:13px;color:var(--muted);min-height:18px}
+.ocr-status.note{margin:0}
+.ocr-out{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(240px,1fr);gap:14px;align-items:start}
+.ocr-view{background:var(--stage-bg) radial-gradient(var(--bg-dots) .8px,transparent .8px) 0 0/16px 16px;border-radius:12px;padding:12px;display:grid;place-items:center;min-height:240px}
+.ocr-view .ocr-page{display:block;max-width:100%;height:auto;background:#fff;box-shadow:0 6px 20px rgba(16,35,80,.18)}
+.ocr-stack{position:relative;width:100%}
+.ocr-stack .ocr-ov{position:absolute;left:0;top:0;width:100%;height:100%}
+.ocr-side{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ocr-stats{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ocr-stats:empty{display:none}
+.ocr-stats b{color:var(--ink);font-weight:700}
+.ocr-legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:12px;color:var(--muted)}
+.ocr-lg{display:inline-flex;align-items:center;gap:5px}
+.ocr-lg i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.ocr-lg i.dash{border:2px dashed #D13B53;width:10px;height:10px;border-radius:2px}
+.ocr-text{width:100%;min-height:200px;resize:vertical;font-size:13px;line-height:1.6;font-family:var(--font)}
+@media (max-width:900px){
+  .ocr-out{grid-template-columns:1fr}
+  .ocr-go{margin-left:0}
+}
+
+</style>
+<style>
 /* ---- 11_organize.css ---- */
 /* ---------- 정리 도구: 빠른 고르기 · 정리 메뉴 · 여러 쪽 띠 ---------- */
 /* 쪽 고르기 머리(쪽 삭제·쪽 추출·분할 쪽 모드) */
@@ -902,6 +937,8 @@ button.pv-thumb:hover{border-color:var(--blue-300);box-shadow:var(--ring)}
 .pv-obtns .pv-prn{padding:6px 8px}
 .pv-obtns .pv-save{border-color:var(--blue-200);color:var(--accent)}
 .pv-obtns .pv-save:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.pv-obtns .pv-cmpo{border-color:var(--blue-200);color:var(--accent)}
+.pv-obtns .pv-cmpo:hover{background:var(--accent-soft)}
 
 /* 그림 결과: 썸네일 격자 */
 .outs.pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
@@ -991,10 +1028,57 @@ button.pv-thumb:hover{border-color:var(--blue-300);box-shadow:var(--ring)}
 .pv-zoom{min-width:44px;text-align:right}
 .pv-keys{position:absolute;right:14px;font-size:11.5px;color:var(--story-eyebrow);opacity:.8}
 
+/* ---------- 원본과 비교(1.3) ---------- */
+.pv-top .pv-cmpb.on{background:var(--sky);border-color:var(--sky);color:var(--blue-950)}
+.pv-top .pv-cmpb.on:hover{background:#fff;border-color:#fff;color:var(--blue-950)}
+.pv-main.pv-cmpon{overflow:hidden;align-items:stretch;justify-content:stretch;padding:12px 14px}
+.pv-page.pv-cmpon{flex:1;min-width:0;min-height:0;display:flex;align-self:stretch}
+.pv-cmp{flex:1;min-width:0;min-height:0;display:flex;gap:12px}
+.pv-cmp.slide,.pv-cmp.pv-cmp-col{flex-direction:column;gap:6px}
+.pv-cmp.pv-cmp-col{gap:12px}
+.pv-cmp-pane{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column;gap:6px}
+.pv-cmp-lbl{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pv-cmp-lbl b{font-weight:700;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pv-cmp-pane.res .pv-cmp-lbl b,.pv-cmp.slide .pv-cmp-lbl b:last-child{border-color:var(--blue-300);color:var(--accent)}
+.pv-cmp-how{font-size:12px;color:var(--faint)}
+.pv-cmp-view{flex:1;min-width:0;min-height:0;overflow:auto;display:flex}
+.pv-cmp-view>canvas,.pv-cmp-view>.pv-cmp-stack{margin:auto;flex:none}
+.pv-cmp-stack{position:relative;cursor:ew-resize;user-select:none;-webkit-user-select:none}
+.pv-page.doc .pv-cmp-stack canvas{display:block}
+.pv-page.doc .pv-cmp-stack canvas.pv-cmp-top{position:absolute;left:0;top:0;box-shadow:none}
+.pv-cmp-bar{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--sky);box-shadow:0 0 0 1px rgba(11,31,68,.45);pointer-events:none}
+.pv-cmp-hit{position:absolute;top:0;bottom:0;left:-20px;width:42px;pointer-events:auto;touch-action:none;cursor:ew-resize}
+.pv-cmp-knob{position:absolute;top:50%;left:50%;width:32px;height:32px;margin:-16px 0 0 -16px;border-radius:50%;background:var(--sky);color:var(--blue-950);display:grid;place-items:center;box-shadow:0 2px 8px rgba(11,31,68,.35);pointer-events:none}
+.pv-cmp-knob svg{width:18px;height:18px}
+.pv-cmp-tag{position:absolute;top:8px;font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(11,31,68,.74);color:#fff;pointer-events:none}
+.pv-cmp-tag.l{left:8px}
+.pv-cmp-tag.r{right:8px;background:rgba(30,79,179,.86)}
+/* 아래 조절 줄의 선택 단추(어두운 바탕) */
+.pv-cmpctl,.pv-ocrctl{display:flex;align-items:center;gap:8px}
+.pv-ctl-lbl{font-size:12.5px;font-weight:700;color:var(--story-ink)}
+.pv-ctl-note{font-size:12px;color:var(--story-eyebrow);font-variant-numeric:tabular-nums}
+.pv-ctl-note:empty{display:none}
+.pv-nav .seg{background:var(--story-bg-2);border-color:var(--story-line);padding:2px}
+.pv-nav .seg button{color:var(--story-sub);padding:5px 10px;font-size:12.5px;white-space:nowrap}
+.pv-nav .seg button:hover{color:#fff}
+.pv-nav .seg button.on{background:var(--sky);color:var(--blue-950);border-color:var(--sky)}
+.pv-nav .seg button:disabled{opacity:.4;cursor:not-allowed}
+/* OCR 인식한 글자 겹치기 */
+.pv-ocrwrap{position:relative}
+.pv-page.doc canvas.pv-ocrov{position:absolute;left:0;top:0;background:transparent;box-shadow:none}
+/* 입력 쪽 목록(합치기 미리 보기): 빈 쪽 썸네일 */
+.pv-sb .pv-th.blank{background:#fff;aspect-ratio:1/1.414;min-height:0}
+
 /* 인쇄용 숨은 틀 */
 .pv-print{position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden}
 
 @media (max-width:1100px){ .pv-keys{display:none} }
+@media (max-width:640px){
+  .pv-top .pv-cmpb span{display:none}
+  .pv-cmpctl,.pv-ocrctl{flex-wrap:wrap;justify-content:center}
+  .pv-ctl-lbl{display:none}
+  .pv-main.pv-cmpon{padding:8px}
+}
 @media (max-width:640px){
   .pv-top{flex-wrap:wrap;gap:8px;padding:8px 10px 8px 14px}
   .pv-tt{flex-basis:calc(100% - 50px);order:1}
@@ -1132,6 +1216,36 @@ button.pv-thumb:hover{border-color:var(--blue-300);box-shadow:var(--ring)}
 }
 
 </style>
+<style>
+/* ---- 11_viewtools.css ---- */
+/* =====================================================================
+   1.3 확인 기능: 그림→PDF·스캔 쪽 미리 보기(ipv-) · PDF→그림 미리 보기(jpv-) · 합치기 합친 쪽 미리 보기(mg-)
+   머리·쪽 넘김·설명 띠는 쪽 번호 미리 보기(lp-, 11_edittools.css) 것을 그대로 쓴다.
+   ===================================================================== */
+.ipv-head .btn-sm{background:var(--card-soft);border-color:var(--line)}
+.ipv-holder canvas{display:block;box-shadow:0 6px 24px rgba(25,35,58,.2);background:#fff}
+.ipv-files{min-height:380px}
+
+.jpv-real.on{background:var(--accent-soft);border-color:var(--blue-300);color:var(--accent)}
+.jpv-img{display:block;max-width:100%;max-height:max(320px,calc(100dvh - 300px));height:auto;background:#fff;box-shadow:0 6px 24px rgba(25,35,58,.2)}
+.jpv-holder.real{place-items:start}
+.jpv-img.real{max-width:none;max-height:none}
+.jpv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;width:100%;align-self:start}
+.jpv-item{margin:0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;align-items:center}
+.jpv-item img{max-width:100%;max-height:180px;display:block}
+.jpv-item figcaption{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.mg-tabs{flex:none;padding:2px}
+.mg-tabs button{flex:none;padding:6px 12px;white-space:nowrap}
+.mg-grid .pg{position:relative}
+.mg-grid .pg:hover .thumb{outline:2px solid var(--blue-300)}
+.mg-mark{position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:6px;background:var(--blue-950);color:#fff;display:grid;place-items:center;z-index:2}
+.mg-mark svg{width:13px;height:13px}
+@media (max-width:640px){
+  .jpv-img{max-height:calc(60dvh - 40px)}
+}
+
+</style>
 <!-- ---- 20_shell.html ---- -->
 </head>
 <body>
@@ -1229,6 +1343,10 @@ button.pv-thumb:hover{border-color:var(--blue-300);box-shadow:var(--ring)}
       <p><b>PDF → 글 뽑기</b>는 글자만 꺼내 TXT·마크다운·Word(.docx, 한글에서도 열림)로 저장합니다. 두 단은 왼쪽 → 오른쪽으로 읽고, 저장 전에 쪽마다 미리 보고 「복사」할 수 있습니다. 표·그림·배치는 살리지 못합니다. <b>QR 코드 넣기</b>는 설문·영상 주소를 QR과 누르는 링크로 쪽에 넣습니다. OCR은 이미 글자가 있는 쪽을 건너뜁니다.</p>
     </section>
     <section class="help-item">
+      <h4>원본과 비교 · 미리 확인 (1.3)</h4>
+      <p>압축·쪽 번호·워터마크·편집·가리기·OCR 등은 결과 화면의 <b>원본과 비교</b>로 원본과 결과의 같은 쪽을 겹쳐(막대를 끌어) 또는 나란히 봅니다(<kbd>C</kbd>). OCR 결과는 큰 보기에서 <b>인식한 글자</b>를 상자·읽은 글로 겹쳐 보고, 실행 전에 <b>한 쪽 시험 인식</b>도 할 수 있습니다. 그림→PDF·스캔은 <b>쪽 미리 보기</b>, PDF→그림은 실제로 만든 그림 <b>미리 보기</b>, 합치기는 <b>합친 쪽 미리 보기</b>로 결과를 먼저 확인합니다.</p>
+    </section>
+    <section class="help-item">
       <h4>빠르게 쓰는 법</h4>
       <p><kbd>/</kbd> 도구 찾기 · <kbd>Ctrl+O</kbd> 파일 열기 · <kbd>Ctrl+V</kbd> 복사한 그림·파일 붙여넣기 · <kbd>Ctrl+Enter</kbd> 실행 · 결과 화면에서 <kbd>Ctrl+S</kbd> 저장. 편집 무대에서는 <kbd>V</kbd> 선택 <kbd>T</kbd> 글 <kbd>P</kbd> 펜 등 글쇠 하나로 도구를 바꾸고, <kbd>Ctrl</kbd>+휠로 확대합니다.</p>
     </section>
@@ -1253,7 +1371,7 @@ button.pv-thumb:hover{border-color:var(--blue-300);box-shadow:var(--ring)}
    송쌤과학 PDF 편집기 — 공통 뼈대
    모든 처리는 브라우저 안에서만 끝난다. 서버로 파일을 보내지 않는다.
    ===================================================================== */
-const APP_VERSION = '1.2.1';
+const APP_VERSION = '1.3.0';
 // CDN 라이브러리가 하나라도 안 왔으면 빈 화면 대신 안내를 띄운다
 if (!window.PDFLib || !window.pdfjsLib || !window.JSZip || !window.fontkit) {
   const missing = ['PDFLib', 'pdfjsLib', 'JSZip', 'fontkit'].filter(k => !window[k]).join(', ');
@@ -3204,15 +3322,33 @@ PE.PagePanel = class PagePanel {
 /* =====================================================================
    결과 미리 보기: 큰 쪽 보기 + 쪽 띠 + 쪽 넘김·확대 + 저장·인쇄
    결과 화면(50_app.js)이 쓴다. 인쇄도 blob 주소로만 — 파일은 브라우저 밖으로 나가지 않는다.
+   1.3 · 「원본과 비교」: 쪽이 그대로 이어지는 도구의 결과에는 원본 파일(o.src, linkSources)을 붙여 두고,
+         큰 보기에서 원본·결과를 같은 쪽·같은 확대로 「밀어 보기」(막대를 끌어 겹쳐 보기) 또는 「나란히」 본다(글쇠 C).
+       · OCR 결과(o.ocr = { pages:[인식한 쪽 번호] })는 「인식한 글자」 상자·읽은 글을 쪽 위에 겹친다.
+       · openPages(쪽 목록): 입력 파일의 쪽들(합치기 미리 보기 등)도 같은 큰 보기로 넘겨 본다 — 저장·인쇄 없음.
    ===================================================================== */
 Object.assign(ICONS, {
   print: '<path d="M7 9V4h10v5"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v6H7z"/>',
   pencil: '<path d="M4 20h4l10-10-4-4L4 16z"/>',
+  slide: '<path d="M9 7 4 12l5 5M15 7l5 5-5 5"/>',
 });
 
 PE.viewer = {
-  /** 'pdf' | 'image' | 'text' | null(미리 볼 수 없음: zip 등) */
-  kind(o) { const m = (o && o.mime) || ''; return m === 'application/pdf' ? 'pdf' : /^image\//.test(m) ? 'image' : /^text\//.test(m) ? 'text' : null; },
+  /** 「원본과 비교」를 붙이는 도구: 원본 한 파일 → 결과 한 파일이고 쪽 순서·개수가 그대로인 것(편집은 쪽 판을 안 건드렸을 때만 — 50_app.js) */
+  SAME_PAGES: new Set(['compress', 'repair', 'ocr', 'rotate', 'pagenum', 'watermark', 'crop', 'forms', 'sign', 'redact', 'unlock', 'protect', 'qr', 'page-resize', 'edit']),
+  /** 결과(PDF)마다 원본 파일을 찾아 숨김 속성 o.src 에 둔다 — 결과 이름은 「원본 이름_꼬리.pdf」. 입력 PDF 가 하나면 그것 */
+  linkSources(results, files) {
+    const pdfs = files.filter(f => f.type === 'pdf'), used = new Set();
+    results.forEach(o => {
+      if (o.mime !== 'application/pdf') return;
+      let src = pdfs.length === 1 ? pdfs[0] : null, best = -1;
+      if (!src) for (const f of pdfs) { const b = baseName(f.name); if ((o.name.startsWith(b + '_') || o.name === b + '.pdf') && (b.length > best || (b.length === best && used.has(src) && !used.has(f)))) { best = b.length; src = f; } }
+      if (!src) return;
+      used.add(src); Object.defineProperty(o, 'src', { value: src, writable: true, configurable: true, enumerable: false });
+    });
+  },
+  /** 'pdf' | 'image' | 'text' | 'pages'(입력 쪽 목록) | null(미리 볼 수 없음: zip 등) */
+  kind(o) { if (o && o.pageList) return 'pages'; const m = (o && o.mime) || ''; return m === 'application/pdf' ? 'pdf' : /^image\//.test(m) ? 'image' : /^text\//.test(m) ? 'text' : null; },
   /** 미리 보기용 항목 — pdf.js 문서·썸네일 캐시를 결과에 붙여 둔다({...o} 로 복사돼도 따라가지 않게 숨김 속성) */
   item(o) {
     if (!o._view) Object.defineProperty(o, '_view', { value: { id: uid(), type: this.kind(o) === 'image' ? 'image' : 'pdf', name: o.name, bytes: o.bytes, password: o.password ?? null, pages: 0 }, writable: true, configurable: true });
@@ -3273,54 +3409,74 @@ PE.viewer = {
   },
   _dropFrame() { if (this._frame) { this._frame.fr.remove(); URL.revokeObjectURL(this._frame.url); this._frame = null; } },
 
+  /** 입력 파일의 쪽 목록을 큰 보기로. pages: [{file, idx, rot?, blank?, size?:[w,h]}], start: 처음 볼 쪽(0부터) */
+  openPages(pages, start = 0, { title = '쪽 미리 보기' } = {}) {
+    if (!pages || !pages.length) return null;
+    return this.open([{ name: title, pageList: pages }], 0, { startPage: start + 1 });
+  },
+
   /* ---------- 큰 보기 ---------- */
-  /** list: 결과 배열, index: 처음 볼 것. opts: { sizeLine, onSave(o), onClose() } */
+  /** list: 결과 배열, index: 처음 볼 것. opts: { sizeLine, onSave(o), onClose(), compare(원본과 비교로 열기), startPage } */
   open(list, index = 0, opts = {}) {
     const all = list.filter(o => this.kind(o)); if (!all.length) return null;
     if (this._v) this._v.close(true); // 바꿔 열기: 기록 칸은 아래에서 이어 쓴다
     const imgs = all.filter(o => this.kind(o) === 'image'), docs = all.filter(o => this.kind(o) !== 'image');
-    const V = { o: null, kind: null, no: 1, n: 0, fit: true, z: 1, zr: 1, nat: [1, 1], token: 0, url: null };
+    const V = { o: null, kind: null, no: 1, n: 0, fit: true, z: 1, zr: 1, nat: [1, 1], token: 0, url: null, cmp: null, cmpMode: null, pos: 50, ocr: 'off' };
     const prevFocus = document.activeElement;
-    // 머리: 이름 · 쪽/크기 · 원본 → 결과, 파일 넘김, 인쇄·저장·닫기
+    // 머리: 이름 · 쪽/크기 · 원본 → 결과, 파일 넘김, 비교·인쇄·저장·닫기
     const name = h('b.pv-name'), sub = h('span.pv-sub'), sum = h('span.pv-sum', { hidden: !opts.sizeLine }, opts.sizeLine || '');
     const fileLbl = h('span.pv-flbl');
     const fileSw = h('div.pv-files',
       h('button.icon-btn', { type: 'button', title: '앞 파일', 'aria-label': '앞 파일', html: icon('back'), onclick: () => stepFile(-1) }), fileLbl,
       h('button.icon-btn', { type: 'button', title: '다음 파일', 'aria-label': '다음 파일', html: icon('next'), onclick: () => stepFile(1) }));
-    const save = () => { if (opts.onSave) opts.onSave(V.o); else downloadBlob(V.o.bytes, V.o.name, V.o.mime); };
+    const save = () => { if (V.kind === 'pages') return; if (opts.onSave) opts.onSave(V.o); else downloadBlob(V.o.bytes, V.o.name, V.o.mime); };
+    const cmpBtn = h('button.btn.btn-sm.pv-cmpb', { type: 'button', title: '원본과 비교 (C)', 'aria-pressed': 'false', hidden: true, onclick: () => setCmp(V.cmp ? null : 'slide') }, iconEl('compare'), h('span', '원본과 비교'));
     const printBtn = h('button.btn.btn-sm', { type: 'button', title: '인쇄 (Ctrl+P)', onclick: () => this.print(V.o) }, iconEl('print'), h('span', '인쇄'));
     const saveBtn = h('button.btn.btn-sm.btn-primary', { type: 'button', title: '저장 (Ctrl+S)', onclick: save }, iconEl('down'), h('span', '저장'));
     const closeBtn = h('button.icon-btn.pv-x', { type: 'button', title: '닫기 (Esc)', 'aria-label': '닫기', html: icon('x'), onclick: () => close() });
-    const top = h('div.pv-top', h('div.pv-tt', name, h('span.pv-subs', sub, sum)), fileSw, h('div.pv-acts', printBtn, saveBtn, closeBtn));
+    const top = h('div.pv-top', h('div.pv-tt', name, h('span.pv-subs', sub, sum)), fileSw, h('div.pv-acts', cmpBtn, printBtn, saveBtn, closeBtn));
     // 몸통: 쪽 띠 + 큰 쪽
     const strip = h('div.pv-strip', { role: 'listbox', 'aria-label': '쪽 목록' });
     const page = h('div.pv-page'), main = h('div.pv-main', { tabindex: '-1' }, page);
-    // 아래: 쪽 넘김 · 확대
+    // 아래: 쪽 넘김 · 비교 방식 · 인식한 글자 · 확대
     const numIn = h('input.inp.pv-no', { type: 'number', min: 1, 'aria-label': '쪽 번호', onchange: () => { const v = parseInt(numIn.value, 10); if (isNaN(v)) numIn.value = V.no; else show(v); } });
     const total = h('span.pv-total'), zl = h('span.pv-zoom');
     const pageCtl = h('span.pv-pagectl',
       h('button.icon-btn', { type: 'button', title: '앞 쪽 (←)', 'aria-label': '앞 쪽', html: icon('back'), onclick: () => show(V.no - 1) }),
       numIn, total,
       h('button.icon-btn', { type: 'button', title: '다음 쪽 (→)', 'aria-label': '다음 쪽', html: icon('next'), onclick: () => show(V.no + 1) }));
+    const cmpSeg = PE.ui.seg([{ v: 'slide', label: '밀어 보기' }, { v: 'side', label: '나란히' }], 'slide', v => setCmp(v));
+    const cmpNote = h('span.pv-ctl-note');
+    const cmpCtl = h('span.pv-cmpctl', { hidden: true }, h('span.pv-ctl-lbl', '원본과 비교'), cmpSeg, cmpNote);
+    const ocrSeg = PE.ui.seg([{ v: 'off', label: '끔' }, { v: 'box', label: '상자' }, { v: 'text', label: '읽은 글' }], 'off', v => { V.ocr = v; show(V.no, true); });
+    const ocrNote = h('span.pv-ctl-note');
+    const ocrCtl = h('span.pv-ocrctl', { hidden: true }, h('span.pv-ctl-lbl', '인식한 글자'), ocrSeg, ocrNote);
     const zoomCtl = h('span.pv-zoomctl',
       h('button.icon-btn', { type: 'button', title: '축소 (-)', 'aria-label': '축소', html: icon('zoomout'), onclick: () => zoom(V.zr / 1.25) }),
       h('button.btn.btn-sm', { type: 'button', title: '화면에 맞춤 (0)', onclick: () => { V.fit = true; show(V.no, true); } }, '맞춤'),
       h('button.icon-btn', { type: 'button', title: '확대 (+)', 'aria-label': '확대', html: icon('zoomin'), onclick: () => zoom(V.zr * 1.25) }), zl);
-    const nav = h('div.pv-nav', pageCtl, zoomCtl, h('span.pv-keys', '← → 쪽 넘김 · Esc 닫기'));
+    const nav = h('div.pv-nav', pageCtl, cmpCtl, ocrCtl, zoomCtl, h('span.pv-keys', '← → 쪽 넘김 · Esc 닫기'));
     const d = h('dialog.pv', { 'aria-label': '결과 미리 보기' }, top, h('div.pv-body', strip, main), nav);
 
     const fitZ = () => { const W = Math.max(80, main.clientWidth - 28), H = Math.max(80, main.clientHeight - 28); return clamp(Math.min(W / V.nat[0], H / V.nat[1]), 0.05, V.kind === 'image' ? 2 : 4); };
     const zoom = z => { V.fit = false; V.z = clamp(z, 0.1, 5); show(V.no, true); };
     const mark = () => { $$('.pv-sb', strip).forEach(b => { const on = +b.dataset.no === V.no; b.classList.toggle('on', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); if (on) b.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }); };
+    /** 원본과 비교할 수 있는가: 결과 PDF 에 원본이 붙어 있고 쪽 수가 같다 */
+    const cmpOk = () => V.kind === 'pdf' && !!V.o && !!V.o.src && V.n > 0 && V.o.src.pages === V.n;
+    const pageLabel = () => { const p = V.o.pageList[V.no - 1]; return !p ? '' : p.blank ? `${V.no}쪽 · 빈 쪽` : `${V.no}쪽 · ${p.file.name} ${p.idx + 1}쪽${p.rot ? ` · ${p.rot}° 돌림` : ''}`; };
     const paintHead = () => {
       name.textContent = V.o.name; name.title = V.o.name;
       const unit = V.kind === 'pdf' ? (V.n ? `${V.n}쪽 · ` : '') : V.kind === 'image' ? (V.o.w ? `${V.o.w}×${V.o.h} · ` : '') : '';
-      sub.textContent = `${unit}${fmtSize(V.o.size || V.o.bytes.length)}`; // 이 파일만. 원본 → 결과(전체)는 sum 에 따로
+      sub.textContent = V.kind === 'pages' ? `전체 ${V.n}쪽 · ${pageLabel()}` : `${unit}${fmtSize(V.o.size || V.o.bytes.length)}`; // 이 파일만. 원본 → 결과(전체)는 sum 에 따로
       const di = docs.indexOf(V.o); fileSw.hidden = V.kind === 'image' || docs.length < 2; fileLbl.textContent = `파일 ${di + 1} / ${docs.length}`;
-      printBtn.hidden = V.kind === 'text';
-      pageCtl.hidden = !V.n || (V.n < 2 && V.kind !== 'pdf'); zoomCtl.hidden = V.kind === 'text' || !V.n; strip.hidden = V.kind === 'text' || V.n < 1;
+      printBtn.hidden = V.kind === 'text' || V.kind === 'pages'; saveBtn.hidden = V.kind === 'pages';
+      const can = cmpOk(); if (!can) V.cmp = null;
+      cmpBtn.hidden = !can; cmpBtn.classList.toggle('on', !!V.cmp); cmpBtn.setAttribute('aria-pressed', V.cmp ? 'true' : 'false');
+      cmpCtl.hidden = !V.cmp; ocrCtl.hidden = !(V.kind === 'pdf' && V.o.ocr && !V.cmp);
+      pageCtl.hidden = !V.n || (V.n < 2 && V.kind !== 'pdf' && V.kind !== 'pages'); zoomCtl.hidden = V.kind === 'text' || !V.n; strip.hidden = V.kind === 'text' || V.n < 1;
       total.textContent = `/ ${V.n}${V.kind === 'image' ? '장' : '쪽'}`; numIn.max = V.n;
     };
+    const setCmp = m => { if (m && !cmpOk()) return; V.cmp = m || null; V.fit = true; if (m) { cmpSeg.set(m); V.ocr = 'off'; ocrSeg.set('off'); } paintHead(); show(V.no, true); };
     const stripBtn = (no, th) => h('button.pv-sb', { type: 'button', role: 'option', dataset: { no }, title: `${no}${V.kind === 'image' ? '번째 그림' : '쪽'}`, onclick: () => show(no) }, th, h('span.n', String(no)));
     const locked = x => {
       const it = this.item(x), inp = h('input.inp', { type: 'password', placeholder: '여는 암호', autocomplete: 'off', 'aria-label': '여는 암호' }), err = h('div.note.err', { hidden: true }, '암호가 맞지 않습니다.');
@@ -3342,10 +3498,106 @@ PE.viewer = {
         if (!V.n) { paintHead(); if (inf.locked) locked(x); else page.replaceChildren(h('div.note.err', '이 결과를 열지 못했습니다. 저장한 뒤 다른 프로그램으로 열어 보세요.')); return; }
         const it = this.item(x);
         for (let i = 1; i <= V.n; i++) { const th = h('span.pv-th'); PE.ui.lazyThumb(th, () => PE.pdfjs.thumb(it, i, 110)); strip.append(stripBtn(i, th)); }
+      } else if (V.kind === 'pages') {
+        V.n = x.pageList.length; V.no = clamp(opts.startPage || 1, 1, Math.max(1, V.n));
+        x.pageList.forEach((p, i) => {
+          const th = h('span.pv-th' + (p.blank ? '.blank' : ''));
+          if (!p.blank) { PE.ui.lazyThumb(th, () => PE.pdfjs.thumb(p.file, p.idx + 1, 110)); if (p.rot) th.addEventListener('thumb', () => { if (th._img) th._img.style.transform = `rotate(${p.rot}deg)`; }); }
+          strip.append(stripBtn(i + 1, th));
+        });
       } else { V.n = 1; V.no = 1; }
+      if (V.cmp && !cmpOk()) V.cmp = null;
       paintHead(); show(V.no, true);
     };
     const stepFile = dir => { const i = docs.indexOf(V.o); const j = clamp(i + dir, 0, docs.length - 1); if (j !== i) setFile(docs[j]); };
+    const dprOf = () => Math.min(window.devicePixelRatio || 1, 2);
+    /** 두 스크롤 창을 같은 비율 자리로(나란히 비교) */
+    const syncScroll = (a, b) => {
+      let lock = false;
+      const link = (x, y) => x.addEventListener('scroll', () => {
+        if (lock) return; lock = true;
+        const fx = x.scrollWidth - x.clientWidth, fy = x.scrollHeight - x.clientHeight;
+        y.scrollLeft = fx > 0 ? x.scrollLeft / fx * (y.scrollWidth - y.clientWidth) : 0;
+        y.scrollTop = fy > 0 ? x.scrollTop / fy * (y.scrollHeight - y.clientHeight) : 0;
+        setTimeout(() => { lock = false; }, 30); // 숨긴 탭에서도 풀리게 rAF 대신
+      });
+      link(a, b); link(b, a);
+    };
+    /** 원본과 결과의 같은 쪽을 같은 확대로 그린다. 「밀어 보기」는 쪽 크기가 같을 때만(다르면 나란히) */
+    const renderCmp = async (no, tk) => {
+      const src = V.o.src, sdoc = await PE.pdfjs.open(src), rdoc = await PE.pdfjs.open(this.item(V.o));
+      const [sp, rp] = await Promise.all([sdoc.getPage(no), rdoc.getPage(no)]);
+      const sv = sp.getViewport({ scale: 1 }), rv = rp.getViewport({ scale: 1 });
+      const same = Math.abs(sv.width - rv.width) < 1.5 && Math.abs(sv.height - rv.height) < 1.5;
+      const mode = V.cmp === 'slide' && same ? 'slide' : 'side', col = mode === 'side' && matchMedia('(max-width:640px)').matches;
+      const nat = [Math.max(sv.width, rv.width), Math.max(sv.height, rv.height)]; V.nat = nat;
+      let z = V.z;
+      if (V.fit) {
+        const W = Math.max(80, main.clientWidth - 28), H = Math.max(80, main.clientHeight - 28), LBL = 34, GAP = 12;
+        z = mode === 'slide' ? Math.min(W / nat[0], (H - LBL) / nat[1]) : col ? Math.min(W / nat[0], (H - 2 * LBL - GAP) / 2 / nat[1]) : Math.min((W - GAP) / 2 / nat[0], (H - LBL) / nat[1]);
+        z = clamp(z, 0.05, 4);
+      }
+      const dpr = dprOf(), cap = v => Math.min(1, 4096 / Math.max(v.width * z * dpr, v.height * z * dpr));
+      const [A, B] = await Promise.all([PE.pdfjs.render(sdoc, no, { scale: z, dpr: dpr * cap(sv) }), PE.pdfjs.render(rdoc, no, { scale: z, dpr: dpr * cap(rv) })]);
+      if (tk !== V.token) return false;
+      [[A.canvas, sv], [B.canvas, rv]].forEach(([c, v]) => { c.style.width = Math.round(v.width * z) + 'px'; c.style.height = Math.round(v.height * z) + 'px'; });
+      const rs = V.o.size || V.o.bytes.length, pct = Math.round((1 - rs / src.size) * 100);
+      const srcLbl = `원본 · ${fmtSize(src.size)}`, resLbl = `결과 · ${fmtSize(rs)}${pct >= 1 ? ` (${pct}% 작아짐)` : pct <= -1 ? ` (${-pct}% 커짐)` : ''}`;
+      let el;
+      if (mode === 'side') {
+        const pane = (lbl, c, cls) => { const view = h('div.pv-cmp-view', c); return [view, h('div.pv-cmp-pane' + cls, h('div.pv-cmp-lbl', h('b', lbl)), view)]; };
+        const [va, pa] = pane(srcLbl, A.canvas, '.src'), [vb, pb] = pane(resLbl, B.canvas, '.res');
+        syncScroll(va, vb); el = h('div.pv-cmp.side' + (col ? '.pv-cmp-col' : ''), pa, pb);
+      } else {
+        B.canvas.classList.add('pv-cmp-top');
+        const bar = h('span.pv-cmp-bar', h('span.pv-cmp-hit', { title: '끌어서 원본·결과 경계 옮기기' }), h('span.pv-cmp-knob', { html: icon('slide') }));
+        const stack = h('div.pv-cmp-stack', A.canvas, B.canvas, bar, h('span.pv-cmp-tag.l', '원본'), h('span.pv-cmp-tag.r', '결과'));
+        const setPos = p => { V.pos = clamp(p, 0, 100); B.canvas.style.clipPath = `inset(0 0 0 ${V.pos}%)`; bar.style.left = V.pos + '%'; };
+        let drag = null; const at = e => { const r = stack.getBoundingClientRect(); setPos((e.clientX - r.left) / Math.max(1, r.width) * 100); };
+        stack.addEventListener('pointerdown', e => {
+          if (e.button > 0) return;
+          if (e.pointerType !== 'mouse' && !e.target.closest('.pv-cmp-hit')) return; // 터치는 막대를 잡았을 때만 — 나머지는 확대한 쪽 굴리기
+          e.preventDefault(); drag = e.pointerId; try { stack.setPointerCapture(e.pointerId); } catch (err) { } at(e);
+        });
+        stack.addEventListener('pointermove', e => { if (drag === e.pointerId) at(e); });
+        const end = e => { if (drag === e.pointerId) drag = null; };
+        stack.addEventListener('pointerup', end); stack.addEventListener('pointercancel', end);
+        setPos(V.pos);
+        el = h('div.pv-cmp.slide', h('div.pv-cmp-lbl', h('b', srcLbl), h('span.pv-cmp-how', '막대를 끌어 비교'), h('b', resLbl)), h('div.pv-cmp-view', stack));
+      }
+      page.replaceChildren(el); V.zr = z; V.cmpMode = mode;
+      cmpNote.textContent = V.cmp === 'slide' && !same ? '쪽 크기가 달라 나란히 봅니다' : '';
+      $$('button', cmpSeg).forEach(b => { if (b.dataset.v === 'slide') b.disabled = !same; }); cmpSeg.set(mode); // 고른 방식이 아니라 실제로 보이는 방식을 표시
+      return true;
+    };
+    /** OCR 결과: 쪽 글자 층을 상자(어디를 읽었나) 또는 읽은 글(무엇으로 읽었나)로 겹친다 */
+    const ocrLayer = async (pg, canvas, z, no) => {
+      const tc = await pg.getTextContent(), vp = pg.getViewport({ scale: z }), dpr = dprOf();
+      const W = parseFloat(canvas.style.width), H = parseFloat(canvas.style.height);
+      const ov = h('canvas.pv-ocrov', { width: Math.round(W * dpr), height: Math.round(H * dpr) }); ov.style.width = W + 'px'; ov.style.height = H + 'px';
+      const g = ov.getContext('2d'); g.scale(dpr, dpr); const boxes = [];
+      for (const it of tc.items) {
+        const t = (it.str || '').trim(); if (!t || !it.transform) continue;
+        const [a, b, c, dd, e, f] = it.transform, len = Math.hypot(a, b) || 1, hh = Math.hypot(c, dd) || it.height || 1, w = it.width || 0;
+        const P = (s, u) => vp.convertToViewportPoint(e + a / len * s + c / hh * u * hh, f + b / len * s + dd / hh * u * hh);
+        boxes.push({ t, q: [P(0, -0.22), P(w, -0.22), P(w, 0.86), P(0, 0.86)] });
+      }
+      const path = q => { g.beginPath(); q.forEach((p, i) => i ? g.lineTo(p[0], p[1]) : g.moveTo(p[0], p[1])); g.closePath(); };
+      if (V.ocr === 'text') { g.fillStyle = 'rgba(255,255,255,.62)'; g.fillRect(0, 0, W, H); }
+      for (const { t, q } of boxes) {
+        path(q);
+        if (V.ocr === 'box') { g.fillStyle = 'rgba(59,123,234,.16)'; g.fill(); g.strokeStyle = 'rgba(30,79,179,.85)'; g.lineWidth = 1; g.stroke(); continue; }
+        g.fillStyle = 'rgba(255,255,255,.96)'; g.fill();
+        const bw = Math.hypot(q[1][0] - q[0][0], q[1][1] - q[0][1]), bh = Math.hypot(q[3][0] - q[0][0], q[3][1] - q[0][1]); if (bw < 1 || bh < 1) continue;
+        g.save(); g.translate(q[0][0], q[0][1]); g.rotate(Math.atan2(q[1][1] - q[0][1], q[1][0] - q[0][0]));
+        g.font = `600 ${bh * 0.8}px ${PE.PDF_FONT_CSS}`; const tw = g.measureText(t).width || 1; g.scale(Math.min(1.4, bw / tw), 1);
+        g.fillStyle = '#1E4FB3'; g.textBaseline = 'alphabetic'; g.fillText(t, 0, -bh * 0.22 / 1.08); g.restore();
+      }
+      ov.addEventListener('pointermove', e => { const r = ov.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top; const hit = boxes.find(({ q }) => x >= Math.min(...q.map(p => p[0])) && x <= Math.max(...q.map(p => p[0])) && y >= Math.min(...q.map(p => p[1])) && y <= Math.max(...q.map(p => p[1]))); ov.title = hit ? hit.t : ''; });
+      const ocred = (V.o.ocr.pages || []).includes(no);
+      ocrNote.textContent = `${ocred ? 'OCR로 인식한 쪽' : '원래 글자가 있던 쪽(건너뜀)'} · 글 조각 ${boxes.length}개`;
+      return h('div.pv-ocrwrap', canvas, ov);
+    };
     const show = async (no, force = false) => {
       if (!V.n) return;
       no = clamp(no, 1, V.n); numIn.value = no; // 범위 밖 번호를 넣어도 칸에는 실제 쪽이 남게
@@ -3353,14 +3605,37 @@ PE.viewer = {
       V.no = no; const tk = ++V.token;
       if (V.kind === 'image') { const o = imgs[no - 1]; if (o !== V.o) { V.o = o; } }
       paintHead(); mark();
-      if (V.kind === 'pdf') {
+      const cmp = !!(V.cmp && cmpOk());
+      if (V.kind === 'pdf' && cmp) { if (!(await renderCmp(no, tk))) return; }
+      else if (V.kind === 'pdf') {
         const doc = await PE.pdfjs.open(this.item(V.o)); const pg = await doc.getPage(no);
         const vp = pg.getViewport({ scale: 1 }); V.nat = [vp.width, vp.height];
-        const z = V.fit ? fitZ() : V.z; const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const z = V.fit ? fitZ() : V.z; const dpr = dprOf();
         const k = Math.min(1, 4096 / Math.max(vp.width * z * dpr, vp.height * z * dpr)); // 아주 큰 캔버스 막기
         const { canvas } = await PE.pdfjs.render(doc, no, { scale: z, dpr: dpr * k });
         if (tk !== V.token) return;
         canvas.style.width = Math.round(vp.width * z) + 'px'; canvas.style.height = Math.round(vp.height * z) + 'px';
+        let el = canvas;
+        if (V.o.ocr) { if (V.ocr !== 'off') el = await ocrLayer(pg, canvas, z, no); else ocrNote.textContent = (V.o.ocr.pages || []).includes(no) ? 'OCR로 인식한 쪽' : '원래 글자가 있던 쪽(건너뜀)'; }
+        if (tk !== V.token) return;
+        page.replaceChildren(el); V.zr = z;
+      } else if (V.kind === 'pages') {
+        const p = V.o.pageList[no - 1], dpr = dprOf(); let canvas, z;
+        if (p.blank) {
+          let size = p.size; // 크기를 모르면 같은 크기로 만들 쪽(like: 합치기 양면 빈 쪽 = 앞 파일 마지막 쪽)에서 잰다
+          if (!size && p.like) { const d0 = await PE.pdfjs.open(p.like.file), pg0 = await d0.getPage(p.like.idx + 1), v0 = pg0.getViewport({ scale: 1, rotation: (pg0.rotate + (p.like.rot || 0)) % 360 }); size = [v0.width, v0.height]; }
+          const [bw, bh] = size || [595.28, 841.89]; V.nat = [bw, bh]; z = V.fit ? fitZ() : V.z;
+          canvas = h('canvas', { width: Math.max(1, Math.round(bw * z * dpr)), height: Math.max(1, Math.round(bh * z * dpr)) });
+          const g = canvas.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, canvas.width, canvas.height);
+          canvas.style.width = Math.round(bw * z) + 'px'; canvas.style.height = Math.round(bh * z) + 'px';
+        } else {
+          const doc = await PE.pdfjs.open(p.file), pg = await doc.getPage(p.idx + 1), rot = p.rot || 0;
+          const vp = pg.getViewport({ scale: 1, rotation: (pg.rotate + rot) % 360 }); V.nat = [vp.width, vp.height]; z = V.fit ? fitZ() : V.z;
+          const k = Math.min(1, 4096 / Math.max(vp.width * z * dpr, vp.height * z * dpr));
+          ({ canvas } = await PE.pdfjs.render(doc, p.idx + 1, { scale: z, dpr: dpr * k, extraRotation: rot }));
+          canvas.style.width = Math.round(vp.width * z) + 'px'; canvas.style.height = Math.round(vp.height * z) + 'px';
+        }
+        if (tk !== V.token) return;
         page.replaceChildren(canvas); V.zr = z;
       } else if (V.kind === 'image') {
         const url = URL.createObjectURL(new Blob([V.o.bytes], { type: V.o.mime }));
@@ -3376,8 +3651,8 @@ PE.viewer = {
         page.replaceChildren(h('pre.pv-text', t + (V.o.bytes.length > 400000 ? '\n…(앞부분만 보여 줍니다)' : '')));
       }
       zl.textContent = Math.round(V.zr * 100) + '%';
-      page.classList.toggle('doc', V.kind !== 'text');
-      main.classList.toggle('scroll', !V.fit);
+      page.classList.toggle('doc', V.kind !== 'text'); page.classList.toggle('pv-cmpon', cmp); // 「PDF 비교」 도구의 .cmp 와 겹치지 않게
+      main.classList.toggle('pv-cmpon', cmp); main.classList.toggle('scroll', !V.fit && !cmp);
     };
     /** fromNav: 이미 기록을 옮긴 뒤(뒤로 가기·주소 바뀜·바꿔 열기)면 기록을 건드리지 않는다.
      *  그 밖(Esc·닫기 단추)에는 열 때 쌓은 기록 칸을 뒤로 걷는다 — 돌려주는 약속은 그 뒤에 풀린다 */
@@ -3396,24 +3671,25 @@ PE.viewer = {
       opts.onClose && opts.onClose();
       return done;
     };
-    // 글쇠: ←/→ 쪽, Home/End, +/-/0 확대, Esc 닫기, Ctrl+P 인쇄, Ctrl+S 저장
+    // 글쇠: ←/→ 쪽, Home/End, +/-/0 확대, C 원본과 비교, Esc 닫기, Ctrl+P 인쇄, Ctrl+S 저장
     d.addEventListener('keydown', e => {
       if ((e.ctrlKey || e.metaKey) && !e.altKey) {
         const k = e.key.toLowerCase();
-        if (k === 'p') { e.preventDefault(); e.stopPropagation(); if (V.kind !== 'text') this.print(V.o); }
+        if (k === 'p') { e.preventDefault(); e.stopPropagation(); if (V.kind !== 'text' && V.kind !== 'pages') this.print(V.o); }
         else if (k === 's') { e.preventDefault(); e.stopPropagation(); save(); }
         return;
       }
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); return; }
       if (/input|textarea|select/i.test(e.target.tagName) || e.altKey) return;
+      if (e.key.toLowerCase() === 'c' && cmpOk()) { e.preventDefault(); setCmp(V.cmp ? null : 'slide'); return; }
       const act = { ArrowLeft: () => show(V.no - 1), PageUp: () => show(V.no - 1), ArrowRight: () => show(V.no + 1), PageDown: () => show(V.no + 1), Home: () => show(1), End: () => show(V.n),
         '+': () => zoom(V.zr * 1.25), '=': () => zoom(V.zr * 1.25), '-': () => zoom(V.zr / 1.25), '0': () => { V.fit = true; show(V.no, true); } }[e.key];
       if (act && V.kind !== 'text') { e.preventDefault(); act(); }
     });
     d.addEventListener('cancel', e => { e.preventDefault(); close(); });
-    // 휴대폰: 맞춤 상태에서 옆으로 밀면 쪽 넘김(맞춤일 때는 CSS 가 가로 끌기를 브라우저에 넘기지 않아 pointerup 이 온다)
+    // 휴대폰: 맞춤 상태에서 옆으로 밀면 쪽 넘김(맞춤일 때는 CSS 가 가로 끌기를 브라우저에 넘기지 않아 pointerup 이 온다). 비교 중에는 막대 끌기와 겹치므로 쉰다
     let sw = null;
-    main.addEventListener('pointerdown', e => { sw = V.fit && e.isPrimary ? { id: e.pointerId, x: e.clientX, y: e.clientY } : null; });
+    main.addEventListener('pointerdown', e => { sw = V.fit && !V.cmp && e.isPrimary ? { id: e.pointerId, x: e.clientX, y: e.clientY } : null; });
     main.addEventListener('pointerup', e => { if (!sw || e.pointerId !== sw.id) return; const dx = e.clientX - sw.x, dy = e.clientY - sw.y; sw = null; if (Math.abs(dx) > 60 && Math.abs(dy) < 50) show(V.no + (dx < 0 ? 1 : -1)); });
     main.addEventListener('pointercancel', () => { sw = null; });
     // 휴대폰 뒤로 가기(브라우저 뒤로)는 큰 보기만 닫는다: 열 때 기록 칸을 하나 쌓고, 그 칸을 벗어나면 닫는다
@@ -3428,11 +3704,13 @@ PE.viewer = {
     let rz = 0, lastWH = '';
     const ro = new ResizeObserver(() => { const wh = main.clientWidth + 'x' + main.clientHeight; if (wh === lastWH) return; lastWH = wh; clearTimeout(rz); rz = setTimeout(() => { if (V.fit && V.n) show(V.no, true); }, 120); });
 
-    const api = { el: d, close: fromNav => close(fromNav), show: n => show(n), get state() { return { name: V.o && V.o.name, no: V.no, n: V.n, kind: V.kind, fit: V.fit, zoom: V.zr }; } };
+    const api = { el: d, close: fromNav => close(fromNav), show: n => show(n), compare: m => setCmp(m), ocr: m => { V.ocr = m; ocrSeg.set(m); show(V.no, true); },
+      get state() { return { name: V.o && V.o.name, no: V.no, n: V.n, kind: V.kind, fit: V.fit, zoom: V.zr, cmp: V.cmp, cmpMode: V.cmp ? V.cmpMode : null, pos: V.pos, ocr: V.ocr, canCompare: cmpOk() }; } };
     this._v = api;
     if (this._closing) this._closing.then(arm); else arm(); // 앞 보기가 기록을 걷는 중이면 끝난 뒤에 쌓는다
     document.body.append(d); d.showModal(); lastWH = main.clientWidth + 'x' + main.clientHeight; ro.observe(main);
     const first = list[index] && this.kind(list[index]) ? list[index] : all[0];
+    if (opts.compare && first && first.src) V.cmp = 'slide'; // 결과 줄 「원본과 비교」 단추로 열면 바로 비교
     setFile(first); closeBtn.focus();
     return api;
   },
@@ -3889,22 +4167,36 @@ PE.writeOutline = (doc, items) => {
 };
 
 /* ---------- ① 합치기 ---------- */
+/** 합친 결과의 쪽 순서(파일 돌리기·양면 빈 쪽 반영) — 「합친 쪽 미리 보기」가 쓴다. run 과 같은 규칙 */
+PE.mergePages = (files, s) => files.flatMap(f => { const ps = Array.from({ length: f.pages }, (_, i) => ({ file: f, idx: i, rot: f.rotation || 0 })); if (s.duplex && f.pages % 2) ps.push({ blank: true, file: null, idx: 0, rot: 0, like: ps[ps.length - 1] }); return ps; }); // 빈 쪽은 그 파일 마지막 쪽(like)과 같은 크기·방향
 PE.registerTool({
   id: 'merge', cat: 'organize', name: 'PDF 합치기', desc: '여러 PDF를 원하는 순서로 하나로', icon: 'merge', accept: 'pdf', multi: true, min: 1, keywords: ['merge', '병합', '결합'],
-  init(ctx) { Object.assign(ctx.state, { name: '', outline: true, duplex: false }); },
+  init(ctx) { Object.assign(ctx.state, { name: '', outline: true, duplex: false, mview: 'files' }); },
   render(ctx) {
-    PE.ui.append(ctx.work, 
-      PE.ui.workHead(`파일 ${ctx.files.length}개 — 끌어서 순서를 바꾸세요`,
-        PE.ui.btn('이름순 ↑', () => { PE.files.sortByName(); ctx.refresh(); }, { cls: 'btn-sm' }),
-        PE.ui.btn('이름순 ↓', () => { PE.files.sortByName(true); ctx.refresh(); }, { cls: 'btn-sm' }),
-        PE.ui.btn('모두 빼기', () => { PE.files.clear(); ctx.refresh(); }, { cls: 'btn-sm' })),
-      h('div.work-body', PE.ui.fileGrid(ctx, { rotate: true })));
-    PE.ui.append(ctx.panel.body, 
+    const s = ctx.state, files = ctx.files;
+    // 작업 영역: 「파일」(끌어서 순서) / 「합친 쪽 미리 보기」(합칠 순서대로 모든 쪽, 파일마다 색, 누르면 크게)
+    const tabs = PE.ui.seg([{ v: 'files', label: `파일 ${files.length}개` }, { v: 'pages', label: '합친 쪽 미리 보기' }], s.mview || 'files', v => { s.mview = v; ctx.refresh(); });
+    tabs.classList.add('lp-tabs', 'mg-tabs');
+    if (s.mview === 'pages') {
+      const pages = PE.mergePages(files, s), blanks = pages.filter(p => p.blank).length;
+      const grid = PE.ui.pageGrid({ pages, mode: 'select', multiFile: files.length > 1, onToggle: (key, i) => PE.viewer.openPages(pages, i, { title: '합친 순서 미리 보기' }) });
+      grid.classList.add('mg-grid');
+      if (s.outline !== false) pages.forEach((p, i) => { if (p.file && p.idx === 0) grid.children[i].append(h('span.mg-mark', { title: `책갈피: ${baseName(p.file.name)}`, html: icon('bookmark') })); });
+      PE.ui.append(ctx.work, h('div.work-head', h('span.title', `합친 결과 ${pages.length}쪽${blanks ? ` (빈 쪽 ${blanks})` : ''} · 쪽을 누르면 크게 봅니다`), tabs), h('div.work-body', grid));
+    } else {
+      PE.ui.append(ctx.work,
+        PE.ui.workHead(`파일 ${files.length}개 — 끌어서 순서를 바꾸세요`,
+          PE.ui.btn('이름순 ↑', () => { PE.files.sortByName(); ctx.refresh(); }, { cls: 'btn-sm' }),
+          PE.ui.btn('이름순 ↓', () => { PE.files.sortByName(true); ctx.refresh(); }, { cls: 'btn-sm' }),
+          PE.ui.btn('모두 빼기', () => { PE.files.clear(); ctx.refresh(); }, { cls: 'btn-sm' }), tabs),
+        h('div.work-body', PE.ui.fileGrid(ctx, { rotate: true })));
+    }
+    PE.ui.append(ctx.panel.body,
       ctx.files.length < 2 ? PE.ui.note('파일이 하나뿐입니다. 「파일 더 넣기」로 추가하세요.', 'warn') : null,
-      PE.ui.note('파일 카드에 마우스를 올리면 파일 전체를 돌리는 단추가 나옵니다. 번호 순서대로 이어 붙입니다.'),
-      PE.ui.check('파일마다 책갈피 넣기', ctx.state.outline, v => ctx.state.outline = v, '(제목 = 파일 이름)'),
+      PE.ui.note('파일 카드에 마우스를 올리면 파일 전체를 돌리는 단추가 나옵니다. 번호 순서대로 이어 붙입니다. 「합친 쪽 미리 보기」에서 결과 쪽 순서를 확인하세요.'),
+      PE.ui.check('파일마다 책갈피 넣기', ctx.state.outline, v => { ctx.state.outline = v; if (s.mview === 'pages') ctx.refresh(); }, '(제목 = 파일 이름)'),
       PE.ui.note('채점한 뒤 「PDF 분할 → 학생별 → 책갈피마다」로 원래 파일대로 다시 나눌 수 있어요.', 'stu-tip'),
-      PE.ui.check('양면 인쇄용: 쪽수가 홀수인 파일 뒤에 빈 쪽', ctx.state.duplex, v => ctx.state.duplex = v, '(파일마다 새 종이에서 시작)'),
+      PE.ui.check('양면 인쇄용: 쪽수가 홀수인 파일 뒤에 빈 쪽', ctx.state.duplex, v => { ctx.state.duplex = v; if (s.mview === 'pages') ctx.refresh(); }, '(파일마다 새 종이에서 시작)'),
       PE.ui.opt({ text: '결과 파일 이름', hint: '비우면 자동' }, PE.ui.text(ctx.state.name, `합친 문서_${dateStamp()}`, v => ctx.state.name = v)));
   },
   async run(ctx) {
@@ -4890,13 +5182,86 @@ const OCR_LANGS = [
   { v: 'spa', label: '스페인어' }, { v: 'fra', label: '프랑스어' }, { v: 'deu', label: '독일어' }, { v: 'rus', label: '러시아어' }, { v: 'vie', label: '베트남어' }, { v: 'tha', label: '타이어' }, { v: 'ara', label: '아랍어' }, { v: 'ind', label: '인도네시아어' },
 ];
 PE.loadTesseract = () => new Promise((res, rej) => { if (window.Tesseract) return res(window.Tesseract); const sc = h('script', { src: 'https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js', onload: () => res(window.Tesseract), onerror: () => rej(new Error('OCR 엔진을 내려받지 못했습니다')) }); document.head.append(sc); });
+/** 인식 일꾼 하나(실행·시험 인식이 함께 씀). onLog(글) 로 내려받기·초기화 진행을 알린다 */
+PE.ocrWorker = async (langs, onLog) => {
+  const T = await PE.loadTesseract();
+  return T.createWorker(langs.join('+'), 1, { logger: m => { if (onLog && m.status && m.progress != null && m.status !== 'recognizing text') onLog(`${m.status === 'loading language traineddata' ? '언어 데이터 내려받는 중' : m.status === 'initializing api' ? '엔진 초기화' : m.status} ${Math.round(m.progress * 100)}%`); }, workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js', corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1', langPath: 'https://tessdata.projectnaptha.com/4.0.0' });
+};
+/** 인식 결과의 낱말 목록(판에 따라 words 가 없으면 blocks 에서 모은다) */
+PE.ocrWordsOf = data => { let words = data.words; if (!words) { words = []; (data.blocks || []).forEach(b => (b.paragraphs || []).forEach(p => (p.lines || []).forEach(l => (l.words || []).forEach(w => words.push(w))))); } return words; };
+/** 시험 인식 일꾼 정리(도구를 떠날 때·실행 직전) */
+const ocrDropTrial = s => { const t = s && s._tw; if (!t) return; s._tw = null; t.w.then(w => w.terminate()).catch(() => { }); };
+const OCR_CONF = [[80, '#1B8F5A', '높음'], [50, '#D08A1F', '보통'], [0, '#D13B53', '낮음']];
+/**
+ * 「한 쪽 시험 인식」: 지금 언어·해상도로 고른 쪽 하나만 인식해 낱말 상자(확신도 색)와 읽은 글을 보여 준다.
+ * 실행과 같은 그리기(PE.pdfjs.render, scale)·같은 기준(확신도 30% 미만은 글자 층에서 뺌)을 쓴다.
+ */
+function ocrTrial(ctx) {
+  const s = ctx.state, files = ctx.files; s.tf = clamp(s.tf || 0, 0, files.length - 1); const cur = () => files[s.tf]; s.tp = clamp(s.tp || 1, 1, cur().pages);
+  let gen = 0;
+  const total = h('span.ocr-total');
+  const pageIn = h('input.inp.ocr-pg', { type: 'number', min: 1, 'aria-label': '시험할 쪽', onchange: () => go(parseInt(pageIn.value, 10) || 1) });
+  const go = no => { s.tp = clamp(no, 1, cur().pages); paint(); };
+  const prev = h('button.icon-btn', { type: 'button', title: '앞 쪽', 'aria-label': '앞 쪽', html: icon('back'), onclick: () => go(s.tp - 1) });
+  const next = h('button.icon-btn', { type: 'button', title: '다음 쪽', 'aria-label': '다음 쪽', html: icon('next'), onclick: () => go(s.tp + 1) });
+  const fileSel = files.length > 1 ? PE.ui.select(files.map((x, i) => ({ v: i, label: `${i + 1}. ${x.name}` })), s.tf, v => { s.tf = +v; s.tp = 1; paint(); }) : null;
+  if (fileSel) fileSel.classList.add('ocr-file');
+  const goBtn = PE.ui.btn('이 쪽 인식해 보기', () => tryIt(), { cls: 'btn-primary btn-sm ocr-go', ic: 'ocr' });
+  const status = h('div.ocr-status'), view = h('div.ocr-view'), stats = h('div.ocr-stats'), text = h('textarea.inp.ocr-text', { readOnly: true, rows: 9, spellcheck: false, 'aria-label': '인식한 글', placeholder: '「이 쪽 인식해 보기」를 누르면 읽은 글이 여기에 나옵니다' });
+  const legend = h('div.ocr-legend', h('span', '확신도'), OCR_CONF.map(([, c, l]) => h('span.ocr-lg', h('i', { style: `background:${c}` }), l)), h('span.ocr-lg', h('i.dash'), '30% 미만(글자 층에서 뺌)'));
+  const paint = async () => {
+    const my = ++gen, f = cur(); pageIn.max = f.pages; pageIn.value = s.tp; total.textContent = `/ ${f.pages}쪽`; prev.disabled = s.tp <= 1; next.disabled = s.tp >= f.pages;
+    stats.replaceChildren(); text.value = ''; view.replaceChildren(h('span.spin')); status.className = 'ocr-status'; status.textContent = '';
+    try {
+      const url = await PE.pdfjs.thumb(f, s.tp, 640); if (my !== gen) return;
+      view.replaceChildren(h('img.ocr-page', { src: url, alt: `${s.tp}쪽`, draggable: 'false' }));
+      if (s.skipText) {
+        const pg = await (await PE.pdfjs.open(f)).getPage(s.tp), n = (await pg.getTextContent()).items.reduce((a, it) => a + (it.str || '').replace(/\s/g, '').length, 0);
+        if (my === gen && n >= 30) { status.className = 'ocr-status note warn'; status.textContent = `이 쪽에는 이미 글자가 ${n}자 있어 실행할 때는 건너뜁니다(「이미 글자가 있는 쪽은 건너뛰기」). 시험 인식은 해 볼 수 있습니다.`; }
+      }
+    } catch (e) { if (my === gen) view.replaceChildren(h('div.note.err', '이 쪽을 그리지 못했습니다: ' + e.message)); }
+  };
+  const tryIt = async () => {
+    if (!s.langs.length) { PE.toast('언어를 하나 이상 고르세요'); return; }
+    const my = ++gen, f = cur(), no = s.tp, key = s.langs.join('+'); goBtn.disabled = true; status.className = 'ocr-status'; stats.replaceChildren();
+    try {
+      if (!s._tw || s._tw.key !== key) { ocrDropTrial(s); s._tw = { key, w: PE.ocrWorker(s.langs, m => { if (my === gen) status.textContent = m; }) }; }
+      status.textContent = window.Tesseract ? 'OCR 엔진 준비 중…' : 'OCR 엔진을 내려받는 중(처음 한 번, 언어 데이터 포함 10 MB 안팎)…';
+      let worker; try { worker = await s._tw.w; } catch (e) { s._tw = null; throw e; }
+      const t0 = performance.now(); status.textContent = `${no}쪽 인식 중…`;
+      const { canvas } = await PE.pdfjs.render(await PE.pdfjs.open(f), no, { scale: s.scale });
+      const res = await worker.recognize(canvas, {}, { text: true, blocks: true }); if (my !== gen || !text.isConnected) return;
+      const words = PE.ocrWordsOf(res.data).filter(w => (w.text || '').trim() && w.bbox), sec = (performance.now() - t0) / 1000;
+      const ov = h('canvas.ocr-ov', { width: canvas.width, height: canvas.height }), g = ov.getContext('2d'), lw = Math.max(1.5, canvas.width / 600);
+      for (const w of words) {
+        const b = w.bbox, conf = w.confidence ?? 100, col = conf < 30 ? '#D13B53' : OCR_CONF.find(([min]) => conf >= min)[1];
+        g.lineWidth = lw; g.strokeStyle = col; g.setLineDash(conf < 30 ? [lw * 3, lw * 2] : []); g.globalAlpha = 1; g.strokeRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+        g.globalAlpha = 0.12; g.fillStyle = col; g.fillRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+      }
+      ov.addEventListener('pointermove', e => { const r = ov.getBoundingClientRect(), k = ov.width / r.width, x = (e.clientX - r.left) * k, y = (e.clientY - r.top) * k; const w = words.find(({ bbox: b }) => x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1); ov.title = w ? `${w.text.trim()} · 확신도 ${Math.round(w.confidence ?? 0)}%` : ''; });
+      canvas.classList.add('ocr-page'); canvas.style.width = '100%'; canvas.style.height = 'auto';
+      view.replaceChildren(h('div.ocr-stack', canvas, ov));
+      const kept = words.filter(w => (w.confidence ?? 100) >= 30), avg = kept.length ? Math.round(kept.reduce((a, w) => a + (w.confidence ?? 100), 0) / kept.length) : 0;
+      stats.replaceChildren(h('b', `낱말 ${kept.length}개`), h('span', `평균 확신도 ${avg}%`), h('span', `${sec.toFixed(1)}초`), words.length > kept.length ? h('span', `흐린 낱말 ${words.length - kept.length}개는 뺌`) : null);
+      text.value = (res.data.text || '').trim(); status.className = 'ocr-status'; status.textContent = kept.length ? `${f.name} ${no}쪽 — 상자에 마우스를 올리면 읽은 낱말과 확신도가 나옵니다` : '읽은 낱말이 없습니다. 언어나 해상도(「정밀」)를 바꿔 다시 해 보세요.';
+      s.tryInfo = { file: s.tf, page: no, words: kept.length, avg, text: text.value };
+    } catch (e) { console.warn(e); if (my === gen) { status.className = 'ocr-status note err'; status.textContent = '시험 인식을 하지 못했습니다: ' + (e && e.message || e); } }
+    finally { goBtn.disabled = false; }
+  };
+  paint();
+  return h('div.work-body.ocr-try', h('div.ocr-bar', fileSel, prev, pageIn, total, next, goBtn), status, h('div.ocr-out', view, h('div.ocr-side', stats, legend, text)));
+}
 
 PE.registerTool({
   id: 'ocr', cat: 'optimize', name: 'OCR (글자 인식)', desc: '스캔 PDF를 검색·복사되는 PDF로', icon: 'ocr', accept: 'pdf', multi: true, min: 1, runLabel: '글자 인식하기', heavy: true, keywords: ['ocr', '스캔', '텍스트 인식', '검색'],
-  init(ctx) { Object.assign(ctx.state, { langs: ['kor', 'eng'], scale: 2, txt: false, range: '', skipText: true }); },
+  init(ctx) { Object.assign(ctx.state, { langs: ['kor', 'eng'], scale: 2, txt: false, range: '', skipText: true, view: 'files' }); },
+  cleanup(ctx) { ocrDropTrial(ctx.state); },
   render(ctx) {
     const s = ctx.state;
-    PE.ui.append(ctx.work, PE.ui.workHead(`파일 ${ctx.files.length}개 · ${ctx.files.reduce((a, f) => a + f.pages, 0)}쪽`), h('div.work-body', PE.ui.fileGrid(ctx)));
+    // 작업 영역: 「파일」 격자 / 「한 쪽 시험 인식」(지금 설정으로 한 쪽만 인식해 상자·읽은 글 확인)
+    const tabs = PE.ui.seg([{ v: 'files', label: `파일 ${ctx.files.length}개` }, { v: 'try', label: '한 쪽 시험 인식' }], s.view || 'files', v => { s.view = v; ctx.refresh(); });
+    tabs.classList.add('ocr-tabs');
+    PE.ui.append(ctx.work, PE.ui.workHead(`파일 ${ctx.files.length}개 · ${ctx.files.reduce((a, f) => a + f.pages, 0)}쪽`, tabs), s.view === 'try' ? ocrTrial(ctx) : h('div.work-body', PE.ui.fileGrid(ctx)));
     PE.ui.append(ctx.panel.body, 
       PE.ui.opt({ text: '문서 언어', hint: '여러 개 가능' }, PE.ui.chips(OCR_LANGS, s.langs, v => s.langs = v, { multi: true })),
       PE.ui.note('처음 쓸 때 인식 엔진과 언어 데이터를 내려받습니다(한국어 약 10 MB, 브라우저가 기억해 둠). 쪽마다 수 초가 걸립니다. 겉모습은 그대로 두고 보이지 않는 글자 층을 덧씌워 검색·복사가 되게 합니다.'),
@@ -4928,15 +5293,15 @@ PE.registerTool({
       plan.push({ f, todo, has, total: want.length });
     }
     if (!plan.some(p => p.todo.length)) throw new Error('모든 쪽에 이미 글자가 있습니다. 「이미 글자가 있는 쪽은 건너뛰기」를 끄면 다시 인식합니다');
+    ocrDropTrial(s); // 시험 인식 일꾼은 놓고(메모리) 실행용을 새로
     await PE.progress.set(null, 'OCR 엔진 준비 중');
-    const T = await PE.loadTesseract();
-    const worker = await T.createWorker(s.langs.join('+'), 1, { logger: m => { if (m.status && m.progress != null && m.status !== 'recognizing text') PE.progress.set(null, `${m.status === 'loading language traineddata' ? '언어 데이터 내려받는 중' : m.status === 'initializing api' ? '엔진 초기화' : m.status} ${Math.round(m.progress * 100)}%`); }, workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js', corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1', langPath: 'https://tessdata.projectnaptha.com/4.0.0' });
+    const worker = await PE.ocrWorker(s.langs, msg => PE.progress.set(null, msg));
     const outs = [];
     try {
       const notes = [];
       for (const { f, todo, has, total } of plan) {
         notes.push(`<b>${esc(f.name)}</b>: ${total}쪽 중 ${todo.length}쪽 인식${has.length ? `, ${has.length}쪽은 이미 글자 있음` : ''}`);
-        if (!todo.length) { outs.push({ name: `${baseName(f.name)}_OCR.pdf`, bytes: f.bytes, mime: 'application/pdf' }); continue; } // 고칠 쪽이 없으면 원본 그대로(파일이 빠지지 않게)
+        if (!todo.length) { outs.push({ name: `${baseName(f.name)}_OCR.pdf`, bytes: f.bytes, mime: 'application/pdf', ocr: { pages: [] } }); continue; } // 고칠 쪽이 없으면 원본 그대로(파일이 빠지지 않게)
         const pdoc = await PE.pdfjs.open(f); const doc = await PE.lib.loadLoose(f);
         const font = await PE.fonts.embed(doc, 'regular');
         const indices = todo;
@@ -4946,8 +5311,7 @@ PE.registerTool({
           await PE.progress.set(k / indices.length, `${f.name} ${i + 1}쪽 인식 중 (${k + 1}/${indices.length})`);
           const { canvas } = await PE.pdfjs.render(pdoc, i + 1, { scale: s.scale });
           const res = await worker.recognize(canvas, {}, { text: true, blocks: true });
-          const data = res.data; let words = data.words;
-          if (!words) { words = []; (data.blocks || []).forEach(b => (b.paragraphs || []).forEach(p => (p.lines || []).forEach(l => (l.words || []).forEach(w => words.push(w))))); }
+          const data = res.data, words = PE.ocrWordsOf(data);
           allText.push(`--- ${i + 1}쪽 ---\n${(data.text || '').trim()}`);
           const page = doc.getPage(i); const pjPage = await pdoc.getPage(i + 1);
           const M = PE.Stage.dispMatrix(pjPage);
@@ -4963,7 +5327,7 @@ PE.registerTool({
           page.pushOperators(setTextRenderingMode(TextRenderingMode.Fill), popGraphicsState());
         }
         await PE.progress.set(1, '저장 중');
-        outs.push({ name: `${baseName(f.name)}_OCR.pdf`, bytes: await PE.lib.save(doc), mime: 'application/pdf' });
+        outs.push({ name: `${baseName(f.name)}_OCR.pdf`, bytes: await PE.lib.save(doc), mime: 'application/pdf', ocr: { pages: todo.map(i => i + 1) } }); // 큰 보기 「인식한 글자」가 인식한 쪽을 가린다
         if (s.txt) outs.push({ name: `${baseName(f.name)}_OCR.txt`, bytes: new TextEncoder().encode(allText.join('\n\n')), mime: 'text/plain' });
       }
       ctx.resultNote = notes.join('<br>');
@@ -4978,6 +5342,8 @@ PE.registerTool({
 'use strict';
 /* =====================================================================
    변환 도구: 그림→PDF · PDF→그림 · 스캔→PDF
+   1.3: 그림→PDF·스캔 「쪽 미리 보기」(쪽 크기·방향·여백대로 그림이 놓이는 자리, 실행과 같은 계산 PE.imagePageLayout)
+        PDF→그림 「미리 보기」(고른 쪽을 지금 해상도·형식으로 실제로 만들어 픽셀 크기·용량을 보여 줌, 실제 크기로 확대)
    ===================================================================== */
 const PAGE_SIZES = { A4: [595.28, 841.89], Letter: [612, 792], A3: [841.89, 1190.55], B5: [498.9, 708.66] };
 /** 투명한 픽셀이 있는지 — 1024px 이하로 줄여서 훑는다(2000px 그림도 몇 ms) */
@@ -4990,6 +5356,19 @@ PE.hasAlpha = src => {
 /** 흰 바탕 위에 옮겨 그린 캔버스 (JPEG 는 투명을 검게 굽는다) */
 PE.onWhite = src => { const c = document.createElement('canvas'); c.width = src.width; c.height = src.height; const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(src, 0, 0); return c; };
 
+/**
+ * 그림 한 장이 들어갈 쪽 → { PW, PH(쪽 크기 pt), x, y, w, h(그림 자리, 왼쪽 아래 원점), m(여백) }.
+ * iw·ih: 넣을 그림 픽셀(돌리기·줄이기 뒤). opts: {orient, size, margin}. 실행(imagesToPdf)과 미리 보기가 함께 쓴다
+ */
+PE.imagePageLayout = (iw, ih, opts) => {
+  let pw, ph;
+  if (opts.size === 'fit') { const k = 0.75; pw = iw * k; ph = ih * k; const cap = 14000; if (Math.max(pw, ph) > cap) { const f = cap / Math.max(pw, ph); pw *= f; ph *= f; } }
+  else { [pw, ph] = PAGE_SIZES[opts.size] || PAGE_SIZES.A4; const land = opts.orient === 'landscape' || (opts.orient === 'auto' && iw > ih); if (land) [pw, ph] = [ph, pw]; }
+  if (opts.size === 'fit' && opts.orient !== 'auto') { const land = opts.orient === 'landscape'; if ((pw > ph) !== land) [pw, ph] = [ph, pw]; }
+  const m = opts.margin || 0, PW = pw + (opts.size === 'fit' ? m * 2 : 0), PH = ph + (opts.size === 'fit' ? m * 2 : 0);
+  const k = Math.min((PW - m * 2) / iw, (PH - m * 2) / ih), w = iw * k, hh = ih * k;
+  return { PW, PH, x: (PW - w) / 2, y: (PH - hh) / 2, w, h: hh, m };
+};
 /** 그림 파일들을 PDF로. opts: {orient:'auto'|'portrait'|'landscape', size:'fit'|'A4'|..., margin:0|20|40, merge:bool, maxSide} */
 PE.imagesToPdf = async (items, opts, onProgress) => {
   const outs = []; let doc = opts.merge ? await PDFDocument.create() : null;
@@ -5004,34 +5383,28 @@ PE.imagesToPdf = async (items, opts, onProgress) => {
     const bytes = await blobToBytes(await canvasToBlob(canvas, isPng ? 'image/png' : 'image/jpeg', 0.9));
     if (!doc) doc = await PDFDocument.create();
     const img = isPng ? await doc.embedPng(bytes) : await doc.embedJpg(bytes);
-    const iw = canvas.width, ih = canvas.height;
-    let pw, ph;
-    if (opts.size === 'fit') { const k = 0.75; pw = iw * k; ph = ih * k; const cap = 14000; if (Math.max(pw, ph) > cap) { const f = cap / Math.max(pw, ph); pw *= f; ph *= f; } }
-    else { [pw, ph] = PAGE_SIZES[opts.size] || PAGE_SIZES.A4; const land = opts.orient === 'landscape' || (opts.orient === 'auto' && iw > ih); if (land) [pw, ph] = [ph, pw]; }
-    if (opts.size === 'fit' && opts.orient !== 'auto') { const land = opts.orient === 'landscape'; if ((pw > ph) !== land) [pw, ph] = [ph, pw]; }
-    const m = opts.margin || 0; const page = doc.addPage([pw + (opts.size === 'fit' ? m * 2 : 0), ph + (opts.size === 'fit' ? m * 2 : 0)]);
-    const { width: PW, height: PH } = page.getSize();
-    const boxW = PW - m * 2, boxH = PH - m * 2; const k = Math.min(boxW / iw, boxH / ih); const dw = iw * k, dh = ih * k;
-    page.drawImage(img, { x: (PW - dw) / 2, y: (PH - dh) / 2, width: dw, height: dh });
+    const L = PE.imagePageLayout(canvas.width, canvas.height, opts);
+    const page = doc.addPage([L.PW, L.PH]);
+    page.drawImage(img, { x: L.x, y: L.y, width: L.w, height: L.h });
     if (!opts.merge) { outs.push({ name: `${baseName(it.name)}.pdf`, bytes: await PE.lib.save(doc), mime: 'application/pdf' }); doc = null; }
   }
   if (opts.merge) outs.push({ name: opts.name || `그림_모음_${dateStamp()}.pdf`, bytes: await PE.lib.save(doc), mime: 'application/pdf' });
   return outs;
 };
-function imageOptionsPanel(ctx, { scan = false } = {}) {
-  const s = ctx.state;
+function imageOptionsPanel(ctx, { scan = false, onChange } = {}) {
+  const s = ctx.state, ch = () => onChange && onChange();
   const nameOpt = PE.ui.opt({ text: '결과 파일 이름', hint: '비우면 자동' }, PE.ui.text(s.name, scan ? `스캔_${dateStamp()}` : `그림_모음_${dateStamp()}`, v => s.name = v)); nameOpt.hidden = !s.merge;
-  const sizeOpt = PE.ui.opt('쪽 크기', PE.ui.seg([{ v: 'fit', label: '그림 크기' }, { v: 'A4', label: 'A4' }, { v: 'Letter', label: 'Letter' }], s.size, v => s.size = v));
+  const sizeOpt = PE.ui.opt('쪽 크기', PE.ui.seg([{ v: 'fit', label: '그림 크기' }, { v: 'A4', label: 'A4' }, { v: 'Letter', label: 'Letter' }], s.size, v => { s.size = v; ch(); }));
   return [
     scan ? null : sizeOpt,
-    PE.ui.opt('묶기', PE.ui.check('모든 그림을 PDF 하나로', s.merge, v => { s.merge = v; nameOpt.hidden = !v; }), nameOpt),
+    PE.ui.opt('묶기', PE.ui.check('모든 그림을 PDF 하나로', s.merge, v => { s.merge = v; nameOpt.hidden = !v; ch(); }), nameOpt),
     PE.ui.adv('방향 · 여백 · 화질',
       scan ? sizeOpt : null,
-      PE.ui.opt('쪽 방향', PE.ui.seg([{ v: 'auto', label: '자동' }, { v: 'portrait', label: '세로' }, { v: 'landscape', label: '가로' }], s.orient, v => s.orient = v)),
-      PE.ui.opt('여백', PE.ui.seg([{ v: 0, label: '없음' }, { v: 20, label: '작게' }, { v: 40, label: '크게' }], s.margin, v => s.margin = +v)),
-      PE.ui.check('큰 사진은 2000px로 줄이기', s.shrink, v => s.shrink = v, '— 용량 절약'),
-      PE.ui.check('PNG는 그대로(무손실) 넣기', s.keepPng, v => s.keepPng = v, '— 글·도형 그림에 좋음. 투명한 그림은 늘 그대로 넣습니다')),
-    PE.ui.note('그림 카드에 마우스를 올리면 돌리기 단추가 나옵니다. 사진의 방향 정보(EXIF)는 자동으로 반영합니다. HEIC(아이폰 원본)는 브라우저가 읽지 못하므로 JPG로 바꿔 올려 주세요.'),
+      PE.ui.opt('쪽 방향', PE.ui.seg([{ v: 'auto', label: '자동' }, { v: 'portrait', label: '세로' }, { v: 'landscape', label: '가로' }], s.orient, v => { s.orient = v; ch(); })),
+      PE.ui.opt('여백', PE.ui.seg([{ v: 0, label: '없음' }, { v: 20, label: '작게' }, { v: 40, label: '크게' }], s.margin, v => { s.margin = +v; ch(); })),
+      PE.ui.check('큰 사진은 2000px로 줄이기', s.shrink, v => { s.shrink = v; ch(); }, '— 용량 절약'),
+      PE.ui.check('PNG는 그대로(무손실) 넣기', s.keepPng, v => { s.keepPng = v; ch(); }, '— 글·도형 그림에 좋음. 투명한 그림은 늘 그대로 넣습니다')),
+    PE.ui.note('그림 카드에 마우스를 올리면 돌리기 단추가 나옵니다. 그림을 누르면 그 쪽을 미리 봅니다. 사진의 방향 정보(EXIF)는 자동으로 반영합니다. HEIC(아이폰 원본)는 브라우저가 읽지 못하므로 JPG로 바꿔 올려 주세요.'),
   ];
 }
 const imageInit = ctx => Object.assign(ctx.state, { orient: 'auto', size: 'fit', margin: 0, merge: true, shrink: true, keepPng: false, name: '' });
@@ -5040,13 +5413,69 @@ const imageRun = (scan) => async ctx => {
   return PE.imagesToPdf(ctx.files, { orient: s.orient, size: s.size, margin: s.margin, merge: s.merge, maxSide: s.shrink ? 2000 : 6000, keepPng: s.keepPng, name: (s.name || (scan ? `스캔_${dateStamp()}` : `그림_모음_${dateStamp()}`)).replace(/\.pdf$/i, '') + '.pdf' }, (p, m) => PE.progress.set(p, m));
 };
 
+/** 그림 크기(EXIF 방향 반영)와 미리 보기용 작은 그림 — 그림마다 한 번 */
+const imgInfo = it => it._ipv || (it._ipv = (async () => {
+  const blob = new Blob([it.bytes], { type: it.mime }); let w, hh;
+  try { const b = await createImageBitmap(blob, { imageOrientation: 'from-image' }); w = b.width; hh = b.height; if (b.close) b.close(); }
+  catch (e) { const im = await imageToCanvas(blob, 12000); w = im.width; hh = im.height; }
+  return { w, h: hh, small: await imageToCanvas(blob, 1200) };
+})().catch(e => { it._ipv = null; throw e; }));
+/**
+ * 그림→PDF·스캔 작업 영역: 머리(제목·단추·「쪽 미리 보기 / 그림 n장」) + 미리 보기 또는 그림 격자.
+ * 돌려주는 opt(): 옵션을 바꾸면 미리 보기로 넘어가 다시 그린다
+ */
+function imageWork(ctx, { buttons = [] } = {}) {
+  const s = ctx.state, files = ctx.files, MMPT = 72 / 25.4; s.ipv = clamp(s.ipv || 0, 0, files.length - 1); s.ipvView = s.ipvView || 'files';
+  const cv = h('canvas.ipv-canvas'), cap = h('div.lp-cap.ipv-cap'), holder = h('div.preview-holder.ipv-holder', cv);
+  const count = h('span.lp-total'), busy = h('span.lp-busy', { hidden: true }, '그리는 중');
+  const go = i => { s.ipv = clamp(i, 0, files.length - 1); paint(); };
+  const prev = h('button.icon-btn', { type: 'button', title: '앞 그림', 'aria-label': '앞 그림', html: icon('back'), onclick: () => go(s.ipv - 1) });
+  const next = h('button.icon-btn', { type: 'button', title: '다음 그림', 'aria-label': '다음 그림', html: icon('next'), onclick: () => go(s.ipv + 1) });
+  const pager = h('div.lp-pager', prev, count, next);
+  const grid = PE.ui.fileGrid(ctx, { rotate: true, onChange: () => paint() });
+  // 그림 카드를 누르면(끌지 않고) 그 그림의 쪽을 미리 본다
+  let down = null;
+  grid.addEventListener('pointerdown', e => { down = [e.clientX, e.clientY]; }, true);
+  grid.addEventListener('click', e => { const card = e.target.closest('.file'); if (!card || e.target.closest('button')) return; if (down && Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 6) return; const i = files.findIndex(f => f.id === card.dataset.id); if (i >= 0) { s.ipv = i; setView('preview'); } });
+  const body = h('div.lp-body.ipv-body', holder, cap), filesBody = h('div.work-body.ipv-files', grid);
+  const tabs = PE.ui.seg([{ v: 'preview', label: '쪽 미리 보기' }, { v: 'files', label: `그림 ${files.length}장` }], s.ipvView, v => setView(v));
+  tabs.classList.add('lp-tabs');
+  const setView = v => { s.ipvView = v; tabs.set(v); const pv = v === 'preview'; body.hidden = pager.hidden = !pv; filesBody.hidden = pv; if (pv) paint(); };
+  PE.ui.append(ctx.work, h('div.work-head.lp-head.ipv-head', tabs, busy, ...buttons, pager), body, filesBody);
+  let gen = 0;
+  const paint = async () => {
+    if (s.ipvView !== 'preview' || !cv.isConnected) return;
+    const my = ++gen, it = files[s.ipv]; if (!it) return;
+    count.textContent = `${s.ipv + 1} / ${files.length}장`; prev.disabled = s.ipv <= 0; next.disabled = s.ipv >= files.length - 1; busy.hidden = false;
+    try {
+      const info = await imgInfo(it); if (my !== gen || !cv.isConnected) return;
+      const maxSide = s.shrink ? 2000 : 6000, k = Math.min(1, maxSide / Math.max(info.w, info.h)), rot = ((it.rotation || 0) % 360 + 360) % 360;
+      let iw = Math.round(info.w * k), ih = Math.round(info.h * k); if (rot % 180) [iw, ih] = [ih, iw];
+      const L = PE.imagePageLayout(iw, ih, { orient: s.orient, size: s.size, margin: s.margin });
+      const aw = Math.max(160, holder.clientWidth - 40), ah = Math.max(160, holder.clientHeight - 70), z = Math.min(aw / L.PW, ah / L.PH, 1.6), dpr = Math.min(2, devicePixelRatio || 1);
+      cv.width = Math.max(1, Math.round(L.PW * z * dpr)); cv.height = Math.max(1, Math.round(L.PH * z * dpr)); cv.style.width = Math.round(L.PW * z) + 'px'; cv.style.height = Math.round(L.PH * z) + 'px';
+      const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.fillStyle = '#fff'; g.fillRect(0, 0, L.PW * z, L.PH * z);
+      const rx = L.x * z, ry = (L.PH - L.y - L.h) * z, rw = L.w * z, rh = L.h * z;
+      g.save(); g.translate(rx + rw / 2, ry + rh / 2); g.rotate(rot * Math.PI / 180); const sw = rot % 180 ? rh : rw, sh = rot % 180 ? rw : rh; g.drawImage(info.small, -sw / 2, -sh / 2, sw, sh); g.restore();
+      if (L.m > 0) { g.setLineDash([5, 4]); g.lineWidth = 1; g.strokeStyle = 'rgba(46,85,209,.7)'; g.strokeRect(L.m * z, L.m * z, (L.PW - 2 * L.m) * z, (L.PH - 2 * L.m) * z); g.setLineDash([]); }
+      const mm = v => Math.round(v / MMPT), pageName = s.size === 'fit' ? `그림 크기 쪽 ${mm(L.PW)}×${mm(L.PH)}mm` : `${s.size} ${L.PW > L.PH ? '가로' : '세로'}`;
+      cap.textContent = `${s.merge ? `${s.ipv + 1}쪽` : `${baseName(it.name)}.pdf`} · ${pageName} · 그림 ${iw}×${ih}px${k < 1 ? ` (원본 ${info.w}×${info.h}px에서 줄임)` : ''}${L.m ? ` · 여백 ${mm(L.m)}mm` : ''}`;
+      s.ipvInfo = { i: s.ipv, PW: L.PW, PH: L.PH, x: L.x, y: L.y, w: L.w, h: L.h, iw, ih, n: (s.ipvInfo ? s.ipvInfo.n : 0) + 1 };
+    } catch (e) { console.warn(e); if (my === gen) cap.textContent = '미리 보기를 그리지 못했습니다: ' + (e && e.message || e); }
+    finally { if (my === gen) busy.hidden = true; }
+  };
+  const later = layDebounce(paint, 120);
+  setView(s.ipvView);
+  return { opt: () => { if (s.ipvView !== 'preview') setView('preview'); else later(); }, paint };
+}
+
 /* ---------- ⑩ JPG→PDF ---------- */
 PE.registerTool({
   id: 'jpg2pdf', cat: 'convert', name: '그림 → PDF', desc: 'JPG·PNG 사진을 PDF로', icon: 'jpg2pdf', accept: 'image', multi: true, min: 1, runLabel: 'PDF 만들기', keywords: ['jpg', 'png', 'image', '사진', '이미지'],
   init: imageInit,
   render(ctx) {
-    PE.ui.append(ctx.work, PE.ui.workHead(`그림 ${ctx.files.length}장 — 끌어서 순서를 바꾸세요`, PE.ui.btn('이름순', () => { PE.files.sortByName(); ctx.refresh(); }, { cls: 'btn-sm' }), PE.ui.btn('모두 빼기', () => { PE.files.clear(); ctx.refresh(); }, { cls: 'btn-sm' })), h('div.work-body', PE.ui.fileGrid(ctx, { rotate: true })));
-    PE.ui.append(ctx.panel.body, ...imageOptionsPanel(ctx));
+    const w = imageWork(ctx, { buttons: [PE.ui.btn('이름순', () => { PE.files.sortByName(); ctx.refresh(); }, { cls: 'btn-sm' }), PE.ui.btn('모두 빼기', () => { PE.files.clear(); ctx.refresh(); }, { cls: 'btn-sm' })] });
+    PE.ui.append(ctx.panel.body, ...imageOptionsPanel(ctx, { onChange: w.opt }));
   },
   run: imageRun(false),
 });
@@ -5059,28 +5488,111 @@ PE.registerTool({
   extraPick(ctx) { return h('button.btn.btn-lg', { type: 'button', onclick: async () => { const picked = await PE.ui.pick('image', true, true); if (picked.length) await ctx.addFiles(picked); } }, iconEl('camera'), '카메라로 찍기'); },
   init(ctx) { imageInit(ctx); ctx.state.size = 'A4'; ctx.state.margin = 0; },
   render(ctx) {
-    PE.ui.append(ctx.work, PE.ui.workHead(`${ctx.files.length}장 — 끌어서 순서를 바꾸세요`,
+    const w = imageWork(ctx, { buttons: [
       PE.ui.btn('더 찍기', async () => { const picked = await PE.ui.pick('image', true, true); if (picked.length) await ctx.addFiles(picked); }, { cls: 'btn-sm', ic: 'camera' }),
-      PE.ui.btn('모두 빼기', () => { PE.files.clear(); ctx.refresh(); }, { cls: 'btn-sm' })), h('div.work-body', PE.ui.fileGrid(ctx, { rotate: true })));
-    PE.ui.append(ctx.panel.body, ...imageOptionsPanel(ctx, { scan: true }));
+      PE.ui.btn('모두 빼기', () => { PE.files.clear(); ctx.refresh(); }, { cls: 'btn-sm' })] });
+    PE.ui.append(ctx.panel.body, ...imageOptionsPanel(ctx, { scan: true, onChange: w.opt }));
   },
   run: imageRun(true),
 });
 
 /* ---------- ⑱ PDF→그림 ---------- */
+/** 쪽 하나에 든 그림들 → [{bytes, w, h}]. seen: 같은 그림은 한 번만(파일 안에서 함께 씀). 실행과 미리 보기가 함께 쓴다 */
+PE.pageImages = async (page, mime, q, seen = new Set()) => {
+  const ops = await page.getOperatorList(), out = [];
+  for (let j = 0; j < ops.fnArray.length; j++) {
+    const fn = ops.fnArray[j]; if (fn !== pdfjsLib.OPS.paintImageXObject && fn !== pdfjsLib.OPS.paintInlineImageXObject) continue;
+    let img;
+    try {
+      if (fn === pdfjsLib.OPS.paintInlineImageXObject) img = ops.argsArray[j][0];
+      else { const name = ops.argsArray[j][0]; img = await new Promise((res, rej) => { try { const store = page.objs.has(name) ? page.objs : page.commonObjs; store.get(name, v => res(v)); } catch (e) { rej(e); } }); }
+    } catch (e) { continue; }
+    if (!img || !img.width || img.width * img.height < 2500) continue;
+    const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height; const g = canvas.getContext('2d');
+    if (img.bitmap) g.drawImage(img.bitmap, 0, 0);
+    else if (img.data) {
+      const id = g.createImageData(img.width, img.height); const px = id.data, d = img.data;
+      if (img.kind === 3 || d.length === img.width * img.height * 4) px.set(d);
+      else if (img.kind === 2 || d.length === img.width * img.height * 3) for (let p = 0, k = 0; p < px.length; p += 4, k += 3) { px[p] = d[k]; px[p + 1] = d[k + 1]; px[p + 2] = d[k + 2]; px[p + 3] = 255; }
+      else if (img.kind === 1) { const W = img.width, rowBytes = (W + 7) >> 3; for (let y = 0; y < img.height; y++) for (let x = 0; x < W; x++) { const bit = (d[y * rowBytes + (x >> 3)] >> (7 - (x & 7))) & 1; const o = (y * W + x) * 4; px[o] = px[o + 1] = px[o + 2] = bit ? 255 : 0; px[o + 3] = 255; } }
+      else continue;
+      g.putImageData(id, 0, 0);
+    } else continue;
+    const bytes = await blobToBytes(await canvasToBlob(mime === 'image/jpeg' ? PE.onWhite(canvas) : canvas, mime, q));
+    const sig = `${img.width}x${img.height}:${bytes.length}`; if (seen.has(sig)) continue; seen.add(sig);
+    out.push({ bytes, w: img.width, h: img.height });
+  }
+  return out;
+};
+const DPI_OF = { 1: 72, 2: 144, 3: 216, 4.17: 300 };
+/**
+ * PDF→그림 작업 영역: 「미리 보기 / 파일 n개」. 미리 보기는 고른 쪽을 지금 설정으로 실제로 만들어
+ * (쪽 그림: 같은 해상도·형식·화질 / 그림 추출: 그 쪽에 든 그림들) 픽셀 크기·용량을 보여 준다. 돌려주는 값은 다시 그리기
+ */
+function pdfImageWork(ctx) {
+  const s = ctx.state, files = ctx.files; s.jpvView = s.jpvView || 'preview'; s.jpf = clamp(s.jpf || 0, 0, files.length - 1);
+  const cur = () => files[s.jpf]; s.jpp = clamp(s.jpp || 1, 1, cur().pages);
+  const holder = h('div.preview-holder.jpv-holder'), cap = h('div.lp-cap.jpv-cap'), busy = h('span.lp-busy', { hidden: true }, '만드는 중');
+  const pageIn = h('input.inp', { type: 'number', min: 1, title: '미리 볼 쪽', 'aria-label': '미리 볼 쪽', onchange: () => go(parseInt(pageIn.value, 10) || 1) }), total = h('span.lp-total');
+  const go = no => { s.jpp = clamp(no, 1, cur().pages); paint(); };
+  const prev = h('button.icon-btn', { type: 'button', title: '이전 쪽', 'aria-label': '이전 쪽', html: icon('back'), onclick: () => go(s.jpp - 1) });
+  const next = h('button.icon-btn', { type: 'button', title: '다음 쪽', 'aria-label': '다음 쪽', html: icon('next'), onclick: () => go(s.jpp + 1) });
+  const fileSel = files.length > 1 ? PE.ui.select(files.map((x, i) => ({ v: i, label: `${i + 1}. ${x.name}` })), s.jpf, v => { s.jpf = +v; go(1); }) : null;
+  if (fileSel) { fileSel.classList.add('lp-file'); fileSel.title = '미리 볼 파일'; }
+  const realBtn = h('button.btn.btn-sm.jpv-real', { type: 'button', title: '그림을 실제 픽셀 크기(100%)로 보기 — 선명도 확인', onclick: () => { s.jpvReal = !s.jpvReal; realBtn.classList.toggle('on', !!s.jpvReal); fitImg(); } }, iconEl('zoomin'), h('span', '실제 크기'));
+  realBtn.classList.toggle('on', !!s.jpvReal);
+  const pager = h('div.lp-pager', fileSel, prev, pageIn, total, next);
+  const body = h('div.lp-body', holder, cap), filesBody = h('div.work-body.lp-files', PE.ui.fileGrid(ctx));
+  const tabs = PE.ui.seg([{ v: 'preview', label: '미리 보기' }, { v: 'files', label: `파일 ${files.length}개` }], s.jpvView, v => setView(v));
+  tabs.classList.add('lp-tabs');
+  const setView = v => { s.jpvView = v; tabs.set(v); const pv = v === 'preview'; body.hidden = pager.hidden = realBtn.hidden = !pv; filesBody.hidden = pv; if (pv) paint(); };
+  PE.ui.append(ctx.work, h('div.work-head.lp-head', tabs, busy, realBtn, pager), body, filesBody);
+  let gen = 0, urls = [];
+  const drop = () => { urls.forEach(u => URL.revokeObjectURL(u)); urls = []; };
+  const fitImg = () => { const im = holder.querySelector('img.jpv-img'); if (im) im.classList.toggle('real', !!s.jpvReal); holder.classList.toggle('real', !!s.jpvReal && s.mode === 'pages'); };
+  const paint = async () => {
+    if (s.jpvView !== 'preview' || !holder.isConnected) return;
+    const my = ++gen, f = cur(), no = s.jpp, mime = s.fmt === 'png' ? 'image/png' : 'image/jpeg', ext = s.fmt === 'png' ? 'PNG' : 'JPG';
+    pageIn.max = f.pages; pageIn.value = no; total.textContent = `/ ${f.pages}쪽`; prev.disabled = no <= 1; next.disabled = no >= f.pages; realBtn.hidden = s.mode !== 'pages'; busy.hidden = false;
+    const want = String(s.range || '').trim() ? parseRanges(s.range, f.pages) : null, inRange = !want || want.includes(no - 1), n = want ? want.length : f.pages;
+    try {
+      const doc = await PE.pdfjs.open(f);
+      if (s.mode === 'pages') {
+        const { canvas } = await PE.pdfjs.render(doc, no, { scale: s.scale }); const blob = await canvasToBlob(canvas, mime, s.q);
+        if (my !== gen || !holder.isConnected) return;
+        drop(); const url = URL.createObjectURL(blob); urls.push(url);
+        holder.replaceChildren(h('img.jpv-img', { src: url, alt: `${no}쪽 그림`, draggable: 'false' })); fitImg();
+        cap.textContent = `${no}쪽 → ${canvas.width}×${canvas.height}px (${DPI_OF[s.scale] || Math.round(s.scale * 72)} dpi) · ${ext} · ${fmtSize(blob.size)}` + (inRange ? ` · ${n}장 합계 ≈ ${fmtSize(blob.size * n)}` : ' · 쪽 범위 밖이라 저장되지 않음');
+        s.jpvInfo = { page: no, w: canvas.width, h: canvas.height, size: blob.size, n: (s.jpvInfo ? s.jpvInfo.n : 0) + 1 };
+      } else {
+        const got = await PE.pageImages(await doc.getPage(no), mime, s.q); if (my !== gen || !holder.isConnected) return;
+        drop();
+        holder.replaceChildren(got.length ? h('div.jpv-grid', got.map((g, k) => { const url = URL.createObjectURL(new Blob([g.bytes], { type: mime })); urls.push(url); return h('figure.jpv-item', h('img', { src: url, alt: `그림 ${k + 1}`, draggable: 'false' }), h('figcaption', `${g.w}×${g.h}px · ${fmtSize(g.bytes.length)}`)); }))
+          : h('div.note', '이 쪽에는 꺼낼 그림이 없어요 (아주 작은 그림·아이콘은 건너뜁니다)'));
+        cap.textContent = `${no}쪽에서 그림 ${got.length}개 · ${ext}${inRange ? '' : ' · 쪽 범위 밖이라 저장되지 않음'}`;
+        s.jpvInfo = { page: no, images: got.map(g => [g.w, g.h]), n: (s.jpvInfo ? s.jpvInfo.n : 0) + 1 };
+      }
+    } catch (e) { console.warn(e); if (my === gen) { holder.replaceChildren(h('div.note.err', '미리 보기를 만들지 못했습니다: ' + (e && e.message || e))); cap.textContent = ''; } }
+    finally { if (my === gen) busy.hidden = true; }
+  };
+  s._jpvDrop = drop;
+  setView(s.jpvView);
+  return layDebounce(paint, 200);
+}
 PE.registerTool({
   id: 'pdf2jpg', cat: 'convert', name: 'PDF → 그림', desc: '쪽을 JPG·PNG로, 안의 그림만 꺼내기', icon: 'pdf2jpg', accept: 'pdf', multi: true, min: 1, runLabel: '그림으로 변환', keywords: ['jpg', 'png', '이미지 추출', '쪽 그림'],
   init(ctx) { Object.assign(ctx.state, { mode: 'pages', fmt: 'jpg', scale: 2, q: 0.9, range: '' }); },
+  cleanupWork(ctx) { if (ctx.state._jpvDrop) ctx.state._jpvDrop(); },
+  cleanup(ctx) { this.cleanupWork(ctx); },
   render(ctx) {
-    const s = ctx.state;
-    PE.ui.append(ctx.work, PE.ui.workHead(`파일 ${ctx.files.length}개 · ${ctx.files.reduce((a, f) => a + f.pages, 0)}쪽`), h('div.work-body', PE.ui.fileGrid(ctx)));
-    PE.ui.append(ctx.panel.body, 
+    const s = ctx.state, up = pdfImageWork(ctx);
+    PE.ui.append(ctx.panel.body,
       PE.ui.opt('무엇을', PE.ui.seg([{ v: 'pages', label: '쪽을 그림으로', sub: '쪽마다 그림 한 장' }, { v: 'extract', label: '안의 그림만 추출', sub: '문서에 들어 있는 사진·그림' }], s.mode, v => { s.mode = v; ctx.refresh(); }, { vert: true })),
-      PE.ui.opt('형식', PE.ui.seg([{ v: 'jpg', label: 'JPG' }, { v: 'png', label: 'PNG' }], s.fmt, v => s.fmt = v)),
+      PE.ui.opt('형식', PE.ui.seg([{ v: 'jpg', label: 'JPG' }, { v: 'png', label: 'PNG' }], s.fmt, v => { s.fmt = v; up(); })),
       PE.ui.adv('화질 · 쪽 범위',
-        s.mode === 'pages' ? PE.ui.opt('화질(해상도)', PE.ui.seg([{ v: 1, label: '보통', sub: '72 dpi' }, { v: 2, label: '선명', sub: '144 dpi' }, { v: 3, label: '매우 선명', sub: '216 dpi' }, { v: 4.17, label: '인쇄용', sub: '300 dpi' }], s.scale, v => s.scale = +v, { vert: false })) : null,
-        PE.ui.opt({ text: '쪽 범위', hint: '비우면 전체' }, PE.ui.text(s.range, '예: 1-3,7', v => s.range = v))),
-      PE.ui.note(s.mode === 'pages' ? '그림이 여러 장이면 결과 화면에서 zip으로 한 번에 저장할 수 있습니다.' : '같은 그림이 여러 쪽에 쓰였으면 한 번만 꺼냅니다. 아주 작은 그림(아이콘 등)은 건너뜁니다.'));
+        s.mode === 'pages' ? PE.ui.opt('화질(해상도)', PE.ui.seg([{ v: 1, label: '보통', sub: '72 dpi' }, { v: 2, label: '선명', sub: '144 dpi' }, { v: 3, label: '매우 선명', sub: '216 dpi' }, { v: 4.17, label: '인쇄용', sub: '300 dpi' }], s.scale, v => { s.scale = +v; up(); }, { vert: false })) : null,
+        PE.ui.opt({ text: '쪽 범위', hint: '비우면 전체' }, PE.ui.text(s.range, '예: 1-3,7', v => { s.range = v; up(); }))),
+      PE.ui.note(s.mode === 'pages' ? '미리 보기는 고른 쪽을 지금 설정으로 실제로 만든 그림입니다. 「실제 크기」로 선명도를 확인하세요. 그림이 여러 장이면 결과 화면에서 zip으로 한 번에 저장할 수 있습니다.' : '같은 그림이 여러 쪽에 쓰였으면 한 번만 꺼냅니다. 아주 작은 그림(아이콘 등)은 건너뜁니다.'));
   },
   async run(ctx) {
     const s = ctx.state, outs = [], mime = s.fmt === 'png' ? 'image/png' : 'image/jpeg', ext = s.fmt === 'png' ? '.png' : '.jpg';
@@ -5096,29 +5608,7 @@ PE.registerTool({
         const seen = new Set(); let n = 0;
         for (let k = 0; k < indices.length; k++) {
           const i = indices[k]; await PE.progress.set(k / indices.length, `${f.name} ${i + 1}쪽 살피는 중`);
-          const page = await doc.getPage(i + 1); const ops = await page.getOperatorList();
-          for (let j = 0; j < ops.fnArray.length; j++) {
-            const fn = ops.fnArray[j]; if (fn !== pdfjsLib.OPS.paintImageXObject && fn !== pdfjsLib.OPS.paintInlineImageXObject) continue;
-            let img;
-            try {
-              if (fn === pdfjsLib.OPS.paintInlineImageXObject) img = ops.argsArray[j][0];
-              else { const name = ops.argsArray[j][0]; img = await new Promise((res, rej) => { try { const store = page.objs.has(name) ? page.objs : page.commonObjs; store.get(name, v => res(v)); } catch (e) { rej(e); } }); }
-            } catch (e) { continue; }
-            if (!img || !img.width || img.width * img.height < 2500) continue;
-            const canvas = document.createElement('canvas'); canvas.width = img.width; canvas.height = img.height; const g = canvas.getContext('2d');
-            if (img.bitmap) g.drawImage(img.bitmap, 0, 0);
-            else if (img.data) {
-              const id = g.createImageData(img.width, img.height); const px = id.data, d = img.data;
-              if (img.kind === 3 || d.length === img.width * img.height * 4) px.set(d);
-              else if (img.kind === 2 || d.length === img.width * img.height * 3) for (let p = 0, q = 0; p < px.length; p += 4, q += 3) { px[p] = d[q]; px[p + 1] = d[q + 1]; px[p + 2] = d[q + 2]; px[p + 3] = 255; }
-              else if (img.kind === 1) { const W = img.width, rowBytes = (W + 7) >> 3; for (let y = 0; y < img.height; y++) for (let x = 0; x < W; x++) { const bit = (d[y * rowBytes + (x >> 3)] >> (7 - (x & 7))) & 1; const o = (y * W + x) * 4; px[o] = px[o + 1] = px[o + 2] = bit ? 255 : 0; px[o + 3] = 255; } }
-              else continue;
-              g.putImageData(id, 0, 0);
-            } else continue;
-            const bytes = await blobToBytes(await canvasToBlob(mime === 'image/jpeg' ? PE.onWhite(canvas) : canvas, mime, s.q));
-            const sig = `${img.width}x${img.height}:${bytes.length}`; if (seen.has(sig)) continue; seen.add(sig);
-            outs.push({ name: `${base}_그림${String(++n).padStart(2, '0')}${ext}`, bytes, mime });
-          }
+          for (const g of await PE.pageImages(await doc.getPage(i + 1), mime, s.q, seen)) outs.push({ name: `${base}_그림${String(++n).padStart(2, '0')}${ext}`, bytes: g.bytes, mime });
         }
         if (!n) PE.toast(`${f.name}: 꺼낼 그림이 없습니다`);
       }
@@ -7984,6 +8474,9 @@ const App = {
       // 암호 걸기 결과는 미리 보기에서 열 수 있게 여는 암호를 들고 간다(메모리에만)
       const pw = tool.id === 'protect' && ctx.state.user ? ctx.state.user : null;
       PE.state.results = outputs.map(o => ({ ...o, size: o.bytes.length, ...(o.password == null && pw ? { password: pw } : {}) }));
+      // 「원본과 비교」: 쪽이 그대로 이어지는 도구는 결과마다 원본 파일을 붙여 둔다(편집은 쪽 판으로 쪽을 바꾸지 않았을 때만)
+      const st = ctx.state.stage, pagesKept = !(st && typeof st.pagesChanged === 'function' && st.pagesChanged());
+      if (PE.viewer.SAME_PAGES.has(tool.id) && pagesKept) PE.viewer.linkSources(PE.state.results, PE.state.files);
       // 「설정 고쳐 다시 하기」용: 같은 입력 파일·설정(ctx.state)·무대를 그대로 둔다
       const prev = PE.state.lastRun; if (prev && prev.ctx !== ctx) this._cleanup(prev.ctx);
       const runId = uid();
@@ -8018,7 +8511,8 @@ const App = {
     // 결과가 여럿이면 이 파일 하나가 아니라 합계라는 것을 밝힌다
     const sizeLine = meta.inputSize && outs.every(o => o.mime === 'application/pdf') ? `${outs.length > 1 ? `결과 ${outs.length}개 합계: ` : ''}원본 ${fmtSize(meta.inputSize)} → 결과 ${fmtSize(total)}${pct ? ` (${pct > 0 ? pct + '% 작아짐' : -pct + '% 커짐'})` : ''}` : '';
     this._selOut = Math.max(0, outs.findIndex(printable));
-    const preview = i => { this._selOut = i; V.open(outs, i, { sizeLine, onSave: saveOne }); };
+    const preview = (i, compare = false) => { this._selOut = i; V.open(outs, i, { sizeLine, onSave: saveOne, compare }); };
+    const anySrc = outs.some(o => o.src);
     this._printSel = () => { const o = printable(outs[this._selOut]) ? outs[this._selOut] : outs.find(printable); if (o) V.print(o); else PE.toast('인쇄할 수 있는 결과가 없습니다'); };
     const pdfOuts = outs.filter(o => o.mime === 'application/pdf'), imgOuts = outs.filter(o => /^image\//.test(o.mime));
     const nextTools = PE.tools.filter(t => t.id !== meta.tool && ((pdfOuts.length && t.accept !== 'image') || (imgOuts.length && (t.accept === 'image' || t.accept === 'any'))) && !(t.min > 1 && (pdfOuts.length + imgOuts.length) < t.min));
@@ -8046,6 +8540,7 @@ const App = {
       const saved = h('span.osaved', { hidden: !o.saved }, iconEl('check'), '저장함');
       const btns = h('div.pv-obtns',
         k ? h('button.btn.btn-sm.pv-see', { type: 'button', title: '미리 보기', onclick: () => preview(i) }, iconEl('eye'), h('span', '미리 보기')) : null,
+        o.src && k === 'pdf' ? h('button.btn.btn-sm.pv-cmpo', { type: 'button', title: '원본과 같은 쪽을 겹쳐·나란히 비교', onclick: () => preview(i, true) }, iconEl('compare'), h('span', '원본과 비교')) : null,
         printable(o) ? h('button.btn.btn-sm.pv-prn', { type: 'button', title: '인쇄 (Ctrl+P)', 'aria-label': '인쇄', onclick: () => { this._selOut = i; V.print(o); } }, iconEl('print')) : null,
         h('button.btn.btn-sm.pv-save', { type: 'button', title: '저장', onclick: () => saveOne(o) }, iconEl('down'), h('span', '저장')));
       const el = h('div.out.pv-out', { dataset: { i } },
@@ -8065,7 +8560,7 @@ const App = {
         PE.state.chain.length > 1 ? h('div.chain', PE.state.chain.flatMap((n, i) => [i ? iconEl('next') : null, h('b', n)])) : null),
       h('div.result-body',
         meta.note ? h('div.note', { html: meta.note }) : null,
-        h('p.pv-hint', '썸네일을 누르면 크게 봅니다 · 이름은 눌러서 바로 고칠 수 있어요'),
+        h('p.pv-hint', anySrc ? '「원본과 비교」로 바뀐 곳을 원본과 겹쳐 봅니다 · 썸네일을 누르면 크게 봅니다 · 이름은 눌러서 바로 고칠 수 있어요' : '썸네일을 누르면 크게 봅니다 · 이름은 눌러서 바로 고칠 수 있어요'),
         h('div.outs', { class: (imgGrid ? 'pv-grid' : 'pv-list') + (outs.length > (imgGrid ? 12 : 6) ? ' many' : '') }, rows),
         h('div.result-acts.pv-racts',
           h('button.btn.btn-primary.btn-lg.btn-cta', { type: 'button', onclick: dlAll, title: 'Ctrl+S' }, h('span.label', outs.length > 1 ? `모두 저장 (zip)` : '저장'), iconEl('down')),
