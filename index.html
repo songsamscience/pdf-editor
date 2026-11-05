@@ -590,6 +590,8 @@ del.d{background:#FBD6DB;color:#9C1C2C}
   .btn kbd{display:none}
   .files{grid-template-columns:repeat(2,1fr)}
   .pages{grid-template-columns:repeat(3,1fr);gap:8px}
+  .pg .acts{left:4px;right:4px;top:4px;flex-wrap:wrap;justify-content:flex-end;gap:2px}
+  .pg .acts button{width:26px;height:26px}
   .stage-tools{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:8px 10px}
   .stage-tools::-webkit-scrollbar{display:none}
   .stage-tools .tool-btn span{display:none}
@@ -2509,6 +2511,8 @@ PE.ui = {
     let drag = null;
     // 썸네일 그림의 기본 '끌기'(드래그 앤 드롭)가 pointercancel 을 일으켜 정렬을 가로채지 않게 막는다
     container.addEventListener('dragstart', e => e.preventDefault());
+    // 터치: 브라우저가 끌기를 스크롤로 가져가(pointercancel) 휴대폰에서 순서를 못 바꿨다 — 위아래는 스크롤, 옆으로 끌기 시작하면 순서 바꾸기
+    container.style.touchAction = 'pan-y'; container.style.touchAction = 'pan-y pinch-zoom'; // pinch-zoom 을 모르는 브라우저는 pan-y 로 남는다
     container.addEventListener('pointerdown', e => {
       const card = e.target.closest(itemSel); if (!card || e.target.closest('button,input,textarea,select,a')) return;
       if (e.pointerType === 'mouse') e.preventDefault(); // 글자 선택·그림 끌기 방지
